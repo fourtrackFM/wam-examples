@@ -14,6 +14,7 @@
     "build:csoundpitchshifter": "lerna run build --stream --scope csound-pitchshifter",
     "build:pedalboard": "lerna run build --stream --scope pedalboard",
     "build:synth101": "lerna run build --stream --scope synth101",
+    "build:sampler": "lerna run build --stream --scope sampler",
     "build:midisequencer": "lerna run build --stream --scope wam-midi-sequencer",
     "build": "yarn build:csoundpitchshifter && yarn build:pingpongdelay && yarn build:quadrafuzz && yarn build:livegain && yarn build:synth101 && yarn build:pedalboard && yarn build:midisequencer",
     "start": "lerna run start --stream --scope host -- --color"
