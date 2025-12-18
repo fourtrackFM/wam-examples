@@ -28,7 +28,6 @@ export interface WamExampleTemplateSynth {
     noteOff(channel: number, note: number, velocity: number): void;
     noteEnd(voiceIdx: number): void;
     process(startSample: number, endSample: number, inputs: Float32Array[], outputs: Float32Array[]): void;
-    loadSoundFontData(data: any): void;
 }
 
 export const WamExampleTemplateSynth: {

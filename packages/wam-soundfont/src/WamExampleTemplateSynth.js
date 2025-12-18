@@ -68,7 +68,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			/** @private @type {number} current position in sample playback */
 			this._samplePosition = 0;
 
-				/** @private @type {number} playback speed ratio */
+			/** @private @type {number} playback speed ratio */
 			this._playbackRate = 1.0;
 		}
 
@@ -96,12 +96,23 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 * @param {number} frequency - frequency in Hz
 		 */
 		start(gain, frequency) {
+			console.log('[Part] start called:', {
+				gain,
+				frequency,
+				hasSampleData: !!this._sampleData,
+			});
 			this._active = true;
 			this._gain = gain * 0.3;
 			this._phase = 0.0;
 			this._phaseIncrement = (frequency * 2 * Math.PI) / this._sampleRate;
 			this._samplePosition = 0;
-			this._playbackRate = 1.0;
+			// Calculate playback rate for pitch shifting
+			// Assuming sample is at middle C (261.63 Hz)
+			this._playbackRate = frequency / 261.63;
+			console.log('[Part] Configured:', {
+				gain: this._gain,
+				playbackRate: this._playbackRate,
+			});
 		}
 
 		/**
@@ -127,12 +138,9 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			let n = startSample;
 			while (n < endSample) {
 				if (this._sampleData && this._sampleData.length > 0) {
-					// Play back sample data
+					// Play back sample data with pitch shifting
 					const sampleIndex = Math.floor(this._samplePosition);
-					if (
-						sampleIndex >= 0 &&
-						sampleIndex < this._sampleData.length
-					) {
+					if (sampleIndex < this._sampleData.length) {
 						// Convert Int16 to float (-1 to 1)
 						const sampleValue =
 							this._sampleData[sampleIndex] / 32768.0;
@@ -206,12 +214,6 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		}
 
 		// read-only properties
-		get leftPart() {
-			return this._leftPart;
-		}
-		get rightPart() {
-			return this._rightPart;
-		}
 		get channel() {
 			return this._channel;
 		}
@@ -329,7 +331,9 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 * @returns {WamParameterInfoMap}
 		 */
 		static generateWamParameterInfo() {
-			return {};
+			return {
+				// your synth parameters here
+			};
 		}
 
 		/**
@@ -397,8 +401,10 @@ const getWamExampleTemplateSynth = (moduleId) => {
 
 			// Distribute sample data to all voice parts
 			for (let i = 0; i < this._numVoices; i++) {
-				this._voices[i].leftPart.setSampleData(this._sampleData);
-				this._voices[i].rightPart.setSampleData(this._sampleData);
+				// @ts-ignore
+				this._voices[i]._leftPart.setSampleData(this._sampleData);
+				// @ts-ignore
+				this._voices[i]._rightPart.setSampleData(this._sampleData);
 			}
 
 			console.log(

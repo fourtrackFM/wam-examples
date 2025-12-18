@@ -64,22 +64,6 @@ export default class WamExampleTemplateNode extends WamNode {
 
 		/** @private @type {boolean} */
 		this._soundfontLoaded = false;
-
-		/** @private @type {string} */
-		this._soundfontUrl = 'https://static.fourtrack.fm/GeneralUser-GS.sf2';
-
-		/** @private @type {number} */
-		this._currentProgram = 0;
-
-		// Listen for program change messages from processor
-		this.port.onmessage = (event) => {
-			if (event.data.type === 'programChange') {
-				const program = event.data.program;
-				console.log('[Node] Program change requested:', program);
-				this._currentProgram = program;
-				this._loadSoundFont(this._soundfontUrl, program);
-			}
-		};
 	}
 
 	/**
@@ -88,7 +72,7 @@ export default class WamExampleTemplateNode extends WamNode {
 	async _initialize() {
 		// Call parent initialization first (sends initialize/processor message)
 		await super._initialize();
-
+		
 		// Then load soundfont
 		await this._loadSoundFont(
 			'https://static.fourtrack.fm/GeneralUser-GS.sf2',
@@ -115,9 +99,7 @@ export default class WamExampleTemplateNode extends WamNode {
 			const sf2Data = parseSF2(arrayBuffer, program);
 			console.log(
 				'[Node] SF2 parsed, sample data length:',
-				sf2Data.sampleData?.length,
-				'selected sample:',
-				sf2Data.selectedSample?.name
+				sf2Data.sampleData?.length
 			);
 
 			// Send parsed data to processor
@@ -125,7 +107,6 @@ export default class WamExampleTemplateNode extends WamNode {
 				type: 'loadSoundFont',
 				data: {
 					sampleData: sf2Data.sampleData,
-					selectedSample: sf2Data.selectedSample,
 					sampleRate: sf2Data.sampleRate,
 					program: sf2Data.program,
 				},

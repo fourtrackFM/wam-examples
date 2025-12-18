@@ -74,9 +74,6 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			/** @private Counter for throttling logs */
 			this._processCallCount = 0;
 
-			/** @private Track requested program number */
-			this._requestedProgram = 0;
-
 			// Set up message handler immediately in constructor
 			const originalOnMessage = this.port.onmessage;
 			this.port.onmessage = (event) => {
@@ -88,6 +85,7 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 					);
 					if (this._synth) {
 						console.log('[Processor] Loading SoundFont into synth');
+						// @ts-ignore
 						this._synth.loadSoundFontData(event.data.data);
 					} else {
 						console.log(
@@ -115,7 +113,7 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 				bypass: new WamParameterInfo('bypass', {
 					type: 'boolean',
 					label: 'Bypass',
-					defaultValue: 0,
+					defaultValue: false,
 				}),
 				...WamExampleTemplateSynth.generateWamParameterInfo(),
 			};
@@ -141,6 +139,7 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			// Load pending SoundFont data if available
 			if (this._pendingSoundFontData) {
 				console.log('[Processor] Loading pending SoundFont data');
+				// @ts-ignore
 				this._synth.loadSoundFontData(this._pendingSoundFontData);
 				this._pendingSoundFontData = null;
 			}
@@ -201,13 +200,7 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 					break;
 				case 0xc0:
 					{
-						/* patch/program change */
-						console.log('[Processor] Program change:', data1);
-						// Send message to main thread to reload soundfont
-						this.port.postMessage({
-							type: 'programChange',
-							program: data1,
-						});
+						/* patch change */
 					}
 					break;
 				case 0xd0:
