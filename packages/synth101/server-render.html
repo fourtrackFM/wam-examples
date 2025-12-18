@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synth101 WAV Renderer - Server Version</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .server-info {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .error-info {
+            background: linear-gradient(135deg, #dc3545, #fd7e14);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .setting-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        label {
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        input, select, textarea {
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .sequence-editor {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .sequence-editor h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 2px solid #bee5eb;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 2px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 2px solid #f5c6cb;
+        }
+        
+        .progress {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        audio {
+            width: 100%;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+        
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .quick-action {
+            background: #e9ecef;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .quick-action h4 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        
+        .debug-info {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="serverInfo" class="server-info" style="display: none;">
+            <strong>✅ Server Mode Active</strong><br>
+            Running via HTTP server - ES6 modules will work correctly
+        </div>
+        
+        <div id="errorInfo" class="error-info" style="display: none;">
+            <strong>⚠️ CORS Error Detected</strong><br>
+            Please use the HTTP server to avoid CORS issues with ES6 modules.<br>
+            Run: <code>node server.js</code> or double-click <code>start-server.bat</code>
+        </div>
+        
+        <h1>🎹 Synth101 WAV Renderer</h1>
+        <p class="subtitle">Render MIDI sequences to WAV using OfflineAudioContext and scheduleEvents</p>
+        
+        <div class="settings">
+            <div class="setting-group">
+                <label for="duration">Duration (seconds):</label>
+                <input type="number" id="duration" value="10" min="1" max="60" step="0.1">
+            </div>
+            
+            <div class="setting-group">
+                <label for="sampleRate">Sample Rate:</label>
+                <select id="sampleRate">
+                    <option value="44100">44.1 kHz</option>
+                    <option value="48000">48 kHz</option>
+                    <option value="96000">96 kHz</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="quick-actions">
+            <div class="quick-action">
+                <h4>🎼 Load Example Sequences</h4>
+                <button onclick="loadExampleSequence('scale')">C Major Scale</button>
+                <button onclick="loadExampleSequence('chords')">Chord Progression</button>
+                <button onclick="loadExampleSequence('arpeggio')">Arpeggio</button>
+            </div>
+            
+            <div class="quick-action">
+                <h4>🎛️ Synth Presets</h4>
+                <button onclick="setSynthPreset('lead')">Lead Sound</button>
+                <button onclick="setSynthPreset('pad')">Pad Sound</button>
+                <button onclick="setSynthPreset('bass')">Bass Sound</button>
+            </div>
+        </div>
+        
+        <div class="sequence-editor">
+            <h3>MIDI Sequence Editor</h3>
+            <p>Edit the MIDI events below. Format: [time, noteNumber, velocity, duration]</p>
+            <textarea id="sequenceData" placeholder="Loading example sequence...">[
+    [0.0, 60, 127, 0.5],    // C4 at start
+    [0.5, 64, 100, 0.5],    // E4 
+    [1.0, 67, 100, 0.5],    // G4
+    [1.5, 72, 100, 1.0],    // C5
+    [3.0, 60, 127, 0.25],   // C4 quick notes
+    [3.25, 62, 120, 0.25],  // D4
+    [3.5, 64, 110, 0.25],   // E4
+    [3.75, 65, 100, 0.25],  // F4
+    [4.0, 67, 127, 2.0],    // G4 long
+    [6.0, 69, 100, 0.5],    // A4
+    [6.5, 71, 100, 0.5],    // B4
+    [7.0, 72, 120, 1.0],    // C5
+    [8.0, 76, 100, 0.5],    // E5
+    [8.5, 79, 100, 0.5],    // G5
+    [9.0, 84, 127, 1.0]     // C6
+]</textarea>
+        </div>
+        
+        <div class="controls">
+            <button id="renderButton" onclick="renderAudio()">🎵 Render to WAV</button>
+            <button id="downloadButton" onclick="downloadRendered()" disabled>💾 Download WAV</button>
+            <button id="playButton" onclick="playRendered()" disabled>▶️ Play Audio</button>
+        </div>
+        
+        <div id="status" class="status info" style="display: none;"></div>
+        <div class="progress" id="progressContainer" style="display: none;">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <audio id="audioPlayer" controls style="display: none;"></audio>
+        
+        <div id="debugInfo" class="debug-info" style="display: none;">
+            <strong>Debug Information:</strong><br>
+            <span id="debugText"></span>
+        </div>
+        
+        <div class="footer">
+            <p>🎵 Powered by Web Audio Modules (WAM) and Synth101</p>
+            <p>Uses OfflineAudioContext for high-quality offline rendering</p>
+        </div>
+    </div>
+
+    <script type="module">
+        // Global state
+        let renderedBuffer = null;
+        let synthInstance = null;
+        let currentPreset = 'lead';
+        
+        // UI elements
+        const status = document.getElementById('status');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressBar = document.getElementById('progressBar');
+        const renderButton = document.getElementById('renderButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const playButton = document.getElementById('playButton');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const sequenceData = document.getElementById('sequenceData');
+        const debugInfo = document.getElementById('debugInfo');
+        const debugText = document.getElementById('debugText');
+        
+        // Check if we're running from a server
+        const isServerMode = window.location.protocol === 'http:' || window.location.protocol === 'https:';
+        
+        if (isServerMode) {
+            document.getElementById('serverInfo').style.display = 'block';
+        } else {
+            document.getElementById('errorInfo').style.display = 'block';
+            showStatus('Please run via HTTP server to avoid CORS issues', 'error');
+        }
+        
+        // Example sequences
+        const sequences = {
+            scale: [
+                [0.0, 60, 127, 0.5],   // C4
+                [0.5, 62, 120, 0.5],   // D4
+                [1.0, 64, 110, 0.5],   // E4
+                [1.5, 65, 100, 0.5],   // F4
+                [2.0, 67, 90, 0.5],    // G4
+                [2.5, 69, 80, 0.5],    // A4
+                [3.0, 71, 70, 0.5],    // B4
+                [3.5, 72, 127, 1.0]    // C5
+            ],
+            chords: [
+                // C major
+                [0.0, 60, 127, 2.0], [0.0, 64, 100, 2.0], [0.0, 67, 100, 2.0],
+                // F major  
+                [2.0, 65, 127, 2.0], [2.0, 69, 100, 2.0], [2.0, 72, 100, 2.0],
+                // G major
+                [4.0, 67, 127, 2.0], [4.0, 71, 100, 2.0], [4.0, 74, 100, 2.0],
+                // C major
+                [6.0, 60, 127, 2.0], [6.0, 64, 100, 2.0], [6.0, 67, 100, 2.0], [6.0, 72, 100, 2.0]
+            ],
+            arpeggio: [
+                [0.0, 60, 127, 0.25], [0.25, 64, 120, 0.25], [0.5, 67, 110, 0.25], [0.75, 72, 100, 0.25],
+                [1.0, 65, 127, 0.25], [1.25, 69, 120, 0.25], [1.5, 72, 110, 0.25], [1.75, 77, 100, 0.25],
+                [2.0, 67, 127, 0.25], [2.25, 71, 120, 0.25], [2.5, 74, 110, 0.25], [2.75, 79, 100, 0.25],
+                [3.0, 60, 127, 1.0]
+            ]
+        };
+        
+        // Synth presets
+        const synthPresets = {
+            lead: {
+                waveform: 1,        // Square wave
+                filterFreq: 0.7,    // Bright filter
+                filterRes: 0.3,     // Some resonance
+                envAttack: 0.1,
+                envDecay: 0.3,
+                envSustain: 0.7,
+                envRelease: 0.5
+            },
+            pad: {
+                waveform: 0,        // Sine wave
+                filterFreq: 0.4,    // Darker filter
+                filterRes: 0.1,     // Low resonance
+                envAttack: 1.0,     // Slow attack
+                envDecay: 0.5,
+                envSustain: 0.8,
+                envRelease: 2.0     // Long release
+            },
+            bass: {
+                waveform: 2,        // Sawtooth
+                oscRange: 2,        // Lower octave
+                filterFreq: 0.3,    // Low-pass
+                filterRes: 0.4,     // Punchy
+                envAttack: 0.0,
+                envDecay: 0.4,
+                envSustain: 0.3,
+                envRelease: 0.2
+            }
+        };
+        
+        // Utility functions
+        function showStatus(message, type = 'info') {
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        function showProgress(percent) {
+            progressContainer.style.display = 'block';
+            progressBar.style.width = percent + '%';
+        }
+        
+        function hideProgress() {
+            progressContainer.style.display = 'none';
+        }
+        
+        function showDebug(message) {
+            debugText.textContent += message + '\n';
+            debugInfo.style.display = 'block';
+            console.log('[DEBUG]', message);
+        }
+        
+        // Load example sequence
+        window.loadExampleSequence = function(sequenceName) {
+            if (sequences[sequenceName]) {
+                sequenceData.value = JSON.stringify(sequences[sequenceName], null, 4);
+                showStatus(`Loaded ${sequenceName} sequence`, 'success');
+            }
+        };
+        
+        // Set synth preset
+        window.setSynthPreset = function(presetName) {
+            currentPreset = presetName;
+            showStatus(`Selected ${presetName} preset`, 'info');
+        };
+        
+        // Create WAM MIDI event
+        function createMIDIEvent(type, note, velocity = 127, time = 0) {
+            return {
+                type: 'wam-midi',
+                time: time,
+                data: {
+                    bytes: [type, note, velocity]
+                }
+            };
+        }
+        
+        // Convert MIDI sequence to WAM events
+        function sequenceToWamEvents(sequence) {
+            const events = [];
+            
+            sequence.forEach(([time, note, velocity, duration]) => {
+                // Note on event
+                events.push(createMIDIEvent(0x90, note, velocity, time));
+                
+                // Note off event
+                events.push(createMIDIEvent(0x80, note, 0, time + duration));
+            });
+            
+            // Sort events by time
+            events.sort((a, b) => a.time - b.time);
+            
+            return events;
+        }
+        
+        // Initialize WAM environment
+        async function initializeWAM(audioContext) {
+            try {
+                showDebug('Importing WAM modules...');
+                
+                // Import WAM modules with error handling
+                let WebAudioModule, addFunctionModule, initializeWamEnv, initializeWamGroup, apiVersion;
+                
+                try {
+                    const synthModule = await import('./dist/index.js');
+                    WebAudioModule = synthModule.default;
+                    showDebug('✓ Synth101 module loaded');
+                } catch (error) {
+                    throw new Error(`Failed to load Synth101 module: ${error.message}`);
+                }
+                
+                try {
+                    const sdkModule = await import('../sdk/dist/index.js');
+                    ({ addFunctionModule, initializeWamEnv, initializeWamGroup } = sdkModule);
+                    showDebug('✓ SDK module loaded');
+                } catch (error) {
+                    throw new Error(`Failed to load SDK module: ${error.message}`);
+                }
+                
+                try {
+                    const apiModule = await import('../api/dist/index.js');
+                    apiVersion = apiModule.VERSION;
+                    showDebug('✓ API module loaded');
+                } catch (error) {
+                    throw new Error(`Failed to load API module: ${error.message}`);
+                }
+                
+                showDebug('Initializing WAM environment...');
+                await addFunctionModule(audioContext.audioWorklet, initializeWamEnv, apiVersion);
+                
+                showDebug('Initializing WAM group...');
+                const hostGroupId = 'offline-renderer';
+                const hostGroupKey = performance.now().toString();
+                await addFunctionModule(audioContext.audioWorklet, initializeWamGroup, hostGroupId, hostGroupKey);
+                
+                showDebug('Creating Synth101 instance...');
+                synthInstance = await WebAudioModule.createInstance(hostGroupId, audioContext, {});
+                
+                showDebug('Configuring synth...');
+                await synthInstance.audioNode.setParameterValues({ 
+                    enabled: true,
+                    ...synthPresets[currentPreset]
+                });
+                
+                showDebug('✓ WAM initialized successfully');
+                return synthInstance;
+                
+            } catch (error) {
+                showDebug(`✗ WAM initialization failed: ${error.message}`);
+                throw error;
+            }
+        }
+        
+        // Render audio
+        window.renderAudio = async function() {
+            if (!isServerMode) {
+                showStatus('Cannot render: Please use HTTP server mode', 'error');
+                return;
+            }
+            
+            try {
+                renderButton.disabled = true;
+                renderButton.textContent = '🔄 Rendering...';
+                downloadButton.disabled = true;
+                playButton.disabled = true;
+                debugText.textContent = '';
+                
+                showStatus('Starting offline rendering...', 'info');
+                showProgress(0);
+                
+                // Parse settings
+                const duration = parseFloat(document.getElementById('duration').value);
+                const sampleRate = parseInt(document.getElementById('sampleRate').value);
+                
+                // Parse sequence
+                let sequence;
+                try {
+                    sequence = JSON.parse(sequenceData.value);
+                    showDebug(`Parsed ${sequence.length} note events from sequence`);
+                } catch (error) {
+                    throw new Error('Invalid sequence format: ' + error.message);
+                }
+                
+                showProgress(10);
+                showStatus('Creating offline audio context...', 'info');
+                
+                // Create offline audio context
+                const offlineCtx = new OfflineAudioContext({
+                    numberOfChannels: 2,
+                    length: sampleRate * duration,
+                    sampleRate: sampleRate
+                });
+                
+                showDebug(`Created offline context: ${sampleRate}Hz, ${duration}s, stereo`);
+                
+                showProgress(20);
+                showStatus('Initializing WAM...', 'info');
+                
+                // Initialize WAM
+                const wam = await initializeWAM(offlineCtx);
+                
+                showProgress(40);
+                showStatus('Connecting audio graph...', 'info');
+                
+                // Connect audio
+                wam.audioNode.connect(offlineCtx.destination);
+                showDebug('Audio graph connected');
+                
+                showProgress(60);
+                showStatus('Scheduling MIDI events...', 'info');
+                
+                // Convert and schedule events
+                const events = sequenceToWamEvents(sequence);
+                showDebug(`Generated ${events.length} WAM events`);
+                
+                if (events.length > 0) {
+                    wam.audioNode.scheduleEvents(...events);
+                    showDebug('Events scheduled successfully');
+                    
+                    // Log first few events
+                    events.slice(0, 3).forEach((event, i) => {
+                        const [type, note, velocity] = event.data.bytes;
+                        const noteNames = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+                        const noteName = noteNames[note % 12] + Math.floor(note / 12 - 1);
+                        const eventType = type === 0x90 ? 'ON ' : 'OFF';
+                        showDebug(`Event ${i + 1}: ${event.time.toFixed(2)}s - ${eventType} ${noteName} (vel:${velocity})`);
+                    });
+                }
+                
+                showProgress(80);
+                showStatus('Rendering audio...', 'info');
+                
+                // Render
+                const renderStart = performance.now();
+                renderedBuffer = await offlineCtx.startRendering();
+                const renderTime = (performance.now() - renderStart) / 1000;
+                
+                showProgress(100);
+                showStatus(`Rendering complete! (${renderTime.toFixed(2)}s for ${duration}s audio)`, 'success');
+                showDebug(`Render completed in ${renderTime.toFixed(2)}s`);
+                showDebug(`Output: ${renderedBuffer.numberOfChannels} channels, ${renderedBuffer.length} samples`);
+                
+                // Enable controls
+                downloadButton.disabled = false;
+                playButton.disabled = false;
+                
+                hideProgress();
+                
+            } catch (error) {
+                console.error('Rendering failed:', error);
+                showStatus(`Rendering failed: ${error.message}`, 'error');
+                showDebug(`✗ Error: ${error.message}`);
+                hideProgress();
+            } finally {
+                renderButton.disabled = false;
+                renderButton.textContent = '🎵 Render to WAV';
+            }
+        };
+        
+        // Convert AudioBuffer to WAV
+        function audioBufferToWav(buffer) {
+            const length = buffer.length;
+            const numberOfChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            const bytesPerSample = 2;
+            const blockAlign = numberOfChannels * bytesPerSample;
+            const byteRate = sampleRate * blockAlign;
+            const dataSize = length * blockAlign;
+            
+            const arrayBuffer = new ArrayBuffer(44 + dataSize);
+            const view = new DataView(arrayBuffer);
+            
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+            
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + dataSize, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numberOfChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, byteRate, true);
+            view.setUint16(32, blockAlign, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, dataSize, true);
+            
+            let offset = 44;
+            for (let i = 0; i < length; i++) {
+                for (let ch = 0; ch < numberOfChannels; ch++) {
+                    let sample = buffer.getChannelData(ch)[i];
+                    sample = Math.max(-1, Math.min(1, sample));
+                    const intSample = sample < 0 ? sample * 0x8000 : sample * 0x7FFF;
+                    view.setInt16(offset, intSample, true);
+                    offset += 2;
+                }
+            }
+            
+            return arrayBuffer;
+        }
+        
+        // Download rendered WAV
+        window.downloadRendered = function() {
+            if (!renderedBuffer) return;
+            
+            const wavBuffer = audioBufferToWav(renderedBuffer);
+            const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `synth101_${currentPreset}_${Date.now()}.wav`;
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            URL.revokeObjectURL(url);
+            showStatus('WAV file downloaded!', 'success');
+        };
+        
+        // Play rendered audio
+        window.playRendered = function() {
+            if (!renderedBuffer) return;
+            
+            const wavBuffer = audioBufferToWav(renderedBuffer);
+            const blob = new Blob([wavBuffer], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            
+            audioPlayer.src = url;
+            audioPlayer.style.display = 'block';
+            audioPlayer.play();
+            
+            showStatus('Playing rendered audio...', 'info');
+        };
+        
+        // Initialize
+        showStatus('Ready! Select sequence and preset, then render.', 'info');
+        window.loadExampleSequence('scale'); // Load default sequence
+        
+    </script>
+</body>
+</html>

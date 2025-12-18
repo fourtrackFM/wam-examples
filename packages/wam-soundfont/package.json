@@ -1,0 +1,12 @@
+{
+	"name": "wam-soundfont",
+	"version": "1.0.0",
+	"description": "WAM SoundFont Player",
+	"scripts": {
+		"clean": "if exist dist rmdir /s /q dist",
+		"prebuild": "npm run clean",
+		"build": "node build.js",
+		"postbuild": "npm run copy-to-fourtrack",
+		"copy-to-fourtrack": "xcopy /E /I /Y dist\\* C:\\Users\\acous\\Documents\\GitHub\\fourtrack\\public\\wam\\wam-soundfont\\"
+	}
+}

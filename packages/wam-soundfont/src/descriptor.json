@@ -1,0 +1,17 @@
+{
+  "identifier": "com.webaudiomodules.wam-soundfont",
+  "name": "WAM Soundfont",
+  "vendor": "WebAudioModule",
+  "description": "Soundfont polyphonic instrument player with GUI",
+  "version": "1.0.0",
+  "apiVersion": "2.0.0",
+  "sdkVersion": "2.0.0",
+  "thumbnail": "screenshot.png",
+  "keywords": ["synth", "soundfont", "instrument"],
+  "isInstrument": true,
+  "website": "",
+  "hasMidiInput": true,
+  "hasMidiOutput": false,
+  "hasAudioOutput": true,
+  "hasAudioInput": false
+}

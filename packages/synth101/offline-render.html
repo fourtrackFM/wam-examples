@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAM Synth101 Offline Rendering to WAV</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin: 20px 0;
+        }
+        button {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        .progress {
+            margin: 20px 0;
+            color: #666;
+        }
+        .sequence-editor {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .settings {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .setting-group {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎹 WAM Synth101 Offline Rendering to WAV</h1>
+        
+        <div class="settings">
+            <div class="setting-group">
+                <label for="duration">Duration (seconds):</label>
+                <input type="number" id="duration" value="10" min="1" max="60" step="0.1">
+            </div>
+            
+            <div class="setting-group">
+                <label for="sampleRate">Sample Rate:</label>
+                <select id="sampleRate">
+                    <option value="44100">44.1 kHz</option>
+                    <option value="48000">48 kHz</option>
+                    <option value="96000">96 kHz</option>
+                </select>
+            </div>
+            
+            <div class="setting-group">
+                <label for="bpm">BPM:</label>
+                <input type="number" id="bpm" value="120" min="60" max="200" step="1">
+            </div>
+        </div>
+        
+        <div class="sequence-editor">
+            <h3>MIDI Sequence</h3>
+            <p>Edit the MIDI events below. Format: [time, noteNumber, velocity, duration]</p>
+            <textarea id="sequenceData">[
+    [0.0, 60, 127, 0.5],
+    [0.5, 64, 100, 0.5],
+    [1.0, 67, 100, 0.5],
+    [1.5, 72, 100, 1.0],
+    [3.0, 60, 127, 0.25],
+    [3.25, 62, 120, 0.25],
+    [3.5, 64, 110, 0.25],
+    [3.75, 65, 100, 0.25],
+    [4.0, 67, 127, 2.0],
+    [6.0, 69, 100, 0.5],
+    [6.5, 71, 100, 0.5],
+    [7.0, 72, 120, 1.0],
+    [8.0, 76, 100, 0.5],
+    [8.5, 79, 100, 0.5],
+    [9.0, 84, 127, 1.0]
+]</textarea>
+        </div>
+        
+        <div class="controls">
+            <button id="renderButton">🎵 Render to WAV</button>
+            <button id="downloadButton" disabled>💾 Download WAV</button>
+            <button id="playButton" disabled>▶️ Play Rendered Audio</button>
+        </div>
+        
+        <div class="progress" id="progressText"></div>
+        
+        <audio id="audioPlayer" controls style="width: 100%; margin-top: 20px; display: none;"></audio>
+    </div>
+
+    <script type="module">
+        // Import dependencies
+        import Synth101 from '../synth101/dist/index.js';
+        import { addFunctionModule, initializeWamEnv, initializeWamGroup } from '../sdk/dist/index.js';
+
+        let renderedBuffer = null;
+        let synthInstance = null;
+
+        const progressText = document.getElementById('progressText');
+        const renderButton = document.getElementById('renderButton');
+        const downloadButton = document.getElementById('downloadButton');
+        const playButton = document.getElementById('playButton');
+        const audioPlayer = document.getElementById('audioPlayer');
+
+        // Utility function to create WAM events
+        function createMIDIEvent(type, note, velocity = 127, time = 0) {
+            return {
+                type: 'wam-midi',
+                time: time,
+                data: {
+                    bytes: [type, note, velocity]
+                }
+            };
+        }
+
+        // Convert MIDI sequence to WAM events
+        function sequenceToWamEvents(sequence, bpm) {
+            const events = [];
+            
+            sequence.forEach(([time, note, velocity, duration]) => {
+                // Note on event
+                events.push(createMIDIEvent(0x90, note, velocity, time));
+                
+                // Note off event
+                events.push(createMIDIEvent(0x80, note, 0, time + duration));
+            });
+            
+            // Sort events by time
+            events.sort((a, b) => a.time - b.time);
+            
+            return events;
+        }
+
+        // Initialize WAM environment
+        async function initializeWAM(audioContext) {
+            try {
+                progressText.textContent = 'Initializing WAM environment...';
+                
+                // Initialize WAM environment
+                const { VERSION: apiVersion } = await import('../api/dist/index.js');
+                await addFunctionModule(audioContext.audioWorklet, initializeWamEnv, apiVersion);
+                
+                // Initialize WAM group
+                const hostGroupId = 'offline-renderer';
+                const hostGroupKey = performance.now().toString();
+                await addFunctionModule(audioContext.audioWorklet, initializeWamGroup, hostGroupId, hostGroupKey);
+                
+                progressText.textContent = 'Loading Synth101...';
+                
+                // Create synth instance
+                synthInstance = await Synth101.createInstance(hostGroupId, audioContext, {});
+                
+                // Enable the synth (WAMs are bypassed by default)
+                await synthInstance.audioNode.setParameterValues({ enabled: true });
+                
+                progressText.textContent = 'WAM loaded successfully!';
+                return synthInstance;
+                
+            } catch (error) {
+                console.error('Failed to initialize WAM:', error);
+                progressText.textContent = `Error: ${error.message}`;
+                throw error;
+            }
+        }
+
+        // Render audio using OfflineAudioContext
+        async function renderToWAV() {
+            try {
+                renderButton.disabled = true;
+                progressText.textContent = 'Starting offline rendering...';
+
+                // Get settings
+                const duration = parseFloat(document.getElementById('duration').value);
+                const sampleRate = parseInt(document.getElementById('sampleRate').value);
+                const bpm = parseInt(document.getElementById('bpm').value);
+                
+                // Parse sequence
+                const sequenceText = document.getElementById('sequenceData').value;
+                let sequence;
+                try {
+                    // Remove JavaScript comments before parsing JSON
+                    const cleanedText = sequenceText.replace(/\/\/.*$/gm, '').trim();
+                    sequence = JSON.parse(cleanedText);
+                } catch (error) {
+                    throw new Error('Invalid sequence data format. Please check JSON syntax.');
+                }
+
+                // Create offline audio context
+                const offlineCtx = new OfflineAudioContext({
+                    numberOfChannels: 2,
+                    length: sampleRate * duration,
+                    sampleRate: sampleRate
+                });
+
+                progressText.textContent = 'Initializing synth in offline context...';
+                
+                // Initialize WAM in offline context
+                const wam = await initializeWAM(offlineCtx);
+                
+                progressText.textContent = 'Connecting audio graph...';
+                
+                // Connect synth to destination
+                wam.audioNode.connect(offlineCtx.destination);
+                
+                progressText.textContent = 'Scheduling MIDI events...';
+                
+                // Convert sequence to WAM events and schedule them
+                const events = sequenceToWamEvents(sequence, bpm);
+                console.log('Scheduling events:', events);
+                
+                // Schedule all events
+                wam.audioNode.scheduleEvents(...events);
+                
+                progressText.textContent = 'Rendering audio... This may take a moment.';
+                
+                // Start rendering
+                const renderStartTime = performance.now();
+                renderedBuffer = await offlineCtx.startRendering();
+                const renderTime = (performance.now() - renderStartTime) / 1000;
+                
+                progressText.textContent = `Rendering complete! (${renderTime.toFixed(2)}s render time for ${duration}s audio)`;
+                
+                // Enable download and play buttons
+                downloadButton.disabled = false;
+                playButton.disabled = false;
+                
+            } catch (error) {
+                console.error('Rendering failed:', error);
+                progressText.textContent = `Rendering failed: ${error.message}`;
+            } finally {
+                renderButton.disabled = false;
+            }
+        }
+
+        // Convert AudioBuffer to WAV
+        function audioBufferToWav(buffer) {
+            const length = buffer.length;
+            const numberOfChannels = buffer.numberOfChannels;
+            const sampleRate = buffer.sampleRate;
+            
+            // WAV header
+            const arrayBuffer = new ArrayBuffer(44 + length * numberOfChannels * 2);
+            const view = new DataView(arrayBuffer);
+            
+            // WAV header
+            const writeString = (offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+            
+            writeString(0, 'RIFF');
+            view.setUint32(4, 36 + length * numberOfChannels * 2, true);
+            writeString(8, 'WAVE');
+            writeString(12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numberOfChannels, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * numberOfChannels * 2, true);
+            view.setUint16(32, numberOfChannels * 2, true);
+            view.setUint16(34, 16, true);
+            writeString(36, 'data');
+            view.setUint32(40, length * numberOfChannels * 2, true);
+            
+            // Convert float samples to 16-bit PCM
+            let offset = 44;
+            for (let i = 0; i < length; i++) {
+                for (let ch = 0; ch < numberOfChannels; ch++) {
+                    const sample = Math.max(-1, Math.min(1, buffer.getChannelData(ch)[i]));
+                    view.setInt16(offset, sample * 0x7FFF, true);
+                    offset += 2;
+                }
+            }
+            
+            return arrayBuffer;
+        }
+
+        // Download WAV file
+        function downloadWAV() {
+            if (!renderedBuffer) return;
+            
+            const wavData = audioBufferToWav(renderedBuffer);
+            const blob = new Blob([wavData], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'synth101_render.wav';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            
+            URL.revokeObjectURL(url);
+            progressText.textContent = 'WAV file downloaded!';
+        }
+
+        // Play rendered audio
+        function playRenderedAudio() {
+            if (!renderedBuffer) return;
+            
+            const wavData = audioBufferToWav(renderedBuffer);
+            const blob = new Blob([wavData], { type: 'audio/wav' });
+            const url = URL.createObjectURL(blob);
+            
+            audioPlayer.src = url;
+            audioPlayer.style.display = 'block';
+            audioPlayer.play();
+            
+            progressText.textContent = 'Playing rendered audio...';
+        }
+
+        // Event listeners
+        renderButton.addEventListener('click', renderToWAV);
+        downloadButton.addEventListener('click', downloadWAV);
+        playButton.addEventListener('click', playRenderedAudio);
+
+        // Initialize
+        progressText.textContent = 'Ready to render! Click "Render to WAV" to start.';
+        
+    </script>
+</body>
+</html>
