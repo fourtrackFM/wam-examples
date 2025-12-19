@@ -1,0 +1,1161 @@
+{
+  "timestamp": "2025-12-19T16:13:09.148Z",
+  "sf2Url": "https://static.fourtrack.fm/GeneralUser-GS.sf2",
+  "totalTested": 128,
+  "successful": 128,
+  "failed": 0,
+  "results": [
+    {
+      "program": 0,
+      "success": true,
+      "presetName": "Grand Piano",
+      "instrumentName": "Stereo Grand Mellow",
+      "sampleLength": 70787,
+      "sampleRate": 31000,
+      "rootKey": 26
+    },
+    {
+      "program": 1,
+      "success": true,
+      "presetName": "Bright Grand Piano",
+      "instrumentName": "Stereo Grand Bright",
+      "sampleLength": 70787,
+      "sampleRate": 31000,
+      "rootKey": 26
+    },
+    {
+      "program": 2,
+      "success": true,
+      "presetName": "Electric Grand Piano",
+      "instrumentName": "CP-80 EP",
+      "sampleLength": 10297,
+      "sampleRate": 11025,
+      "rootKey": 36
+    },
+    {
+      "program": 3,
+      "success": true,
+      "presetName": "Honky-Tonk Piano",
+      "instrumentName": "Stereo Grand",
+      "sampleLength": 70787,
+      "sampleRate": 31000,
+      "rootKey": 26
+    },
+    {
+      "program": 4,
+      "success": true,
+      "presetName": "Tine Electric Piano",
+      "instrumentName": "Rhodes P",
+      "sampleLength": 10255,
+      "sampleRate": 44100,
+      "rootKey": 38
+    },
+    {
+      "program": 5,
+      "success": true,
+      "presetName": "FM Electric Piano",
+      "instrumentName": "DX7_2",
+      "sampleLength": 28675,
+      "sampleRate": 44100,
+      "rootKey": 38
+    },
+    {
+      "program": 6,
+      "success": true,
+      "presetName": "Harpsichord",
+      "instrumentName": "Harpsichord_1",
+      "sampleLength": 20717,
+      "sampleRate": 44101,
+      "rootKey": 37
+    },
+    {
+      "program": 7,
+      "success": true,
+      "presetName": "Clavinet",
+      "instrumentName": "Clavinet_1",
+      "sampleLength": 22923,
+      "sampleRate": 32000,
+      "rootKey": 35
+    },
+    {
+      "program": 8,
+      "success": true,
+      "presetName": "Celeste",
+      "instrumentName": "Celeste",
+      "sampleLength": 8115,
+      "sampleRate": 33000,
+      "rootKey": 63
+    },
+    {
+      "program": 9,
+      "success": true,
+      "presetName": "Glockenspiel",
+      "instrumentName": "Glockenspiel",
+      "sampleLength": 39802,
+      "sampleRate": 31250,
+      "rootKey": 80
+    },
+    {
+      "program": 10,
+      "success": true,
+      "presetName": "Music Box",
+      "instrumentName": "Music Box",
+      "sampleLength": 8115,
+      "sampleRate": 33000,
+      "rootKey": 63
+    },
+    {
+      "program": 11,
+      "success": true,
+      "presetName": "Vibraphone",
+      "instrumentName": "Vibraphone",
+      "sampleLength": 13743,
+      "sampleRate": 30000,
+      "rootKey": 46
+    },
+    {
+      "program": 12,
+      "success": true,
+      "presetName": "Marimba",
+      "instrumentName": "Marimba",
+      "sampleLength": 17464,
+      "sampleRate": 22050,
+      "rootKey": 60
+    },
+    {
+      "program": 13,
+      "success": true,
+      "presetName": "Xylophone",
+      "instrumentName": "Xylophone",
+      "sampleLength": 9795,
+      "sampleRate": 20000,
+      "rootKey": 76
+    },
+    {
+      "program": 14,
+      "success": true,
+      "presetName": "Tubular Bells",
+      "instrumentName": "Tubular Bells",
+      "sampleLength": 70387,
+      "sampleRate": 44100,
+      "rootKey": 72
+    },
+    {
+      "program": 15,
+      "success": true,
+      "presetName": "Dulcimer",
+      "instrumentName": "Dulcimer",
+      "sampleLength": 45251,
+      "sampleRate": 44100,
+      "rootKey": 67
+    },
+    {
+      "program": 16,
+      "success": true,
+      "presetName": "Tonewheel Organ",
+      "instrumentName": "Hammond Organ",
+      "sampleLength": 1548,
+      "sampleRate": 22050,
+      "rootKey": 57
+    },
+    {
+      "program": 17,
+      "success": true,
+      "presetName": "Percussive Organ",
+      "instrumentName": "Organ Slow Cycle",
+      "sampleLength": 4977,
+      "sampleRate": 44100,
+      "rootKey": 80
+    },
+    {
+      "program": 18,
+      "success": true,
+      "presetName": "Rock Organ",
+      "instrumentName": "Organ Fast Cycle",
+      "sampleLength": 4671,
+      "sampleRate": 44100,
+      "rootKey": 54
+    },
+    {
+      "program": 19,
+      "success": true,
+      "presetName": "Pipe Organ",
+      "instrumentName": "Pipe Organ",
+      "sampleLength": 59112,
+      "sampleRate": 44100,
+      "rootKey": 48
+    },
+    {
+      "program": 20,
+      "success": true,
+      "presetName": "Reed Organ",
+      "instrumentName": "Reed Organ_1",
+      "sampleLength": 10215,
+      "sampleRate": 44100,
+      "rootKey": 58
+    },
+    {
+      "program": 21,
+      "success": true,
+      "presetName": "Accordion",
+      "instrumentName": "Accordion_1",
+      "sampleLength": 10602,
+      "sampleRate": 44100,
+      "rootKey": 54
+    },
+    {
+      "program": 22,
+      "success": true,
+      "presetName": "Harmonica",
+      "instrumentName": "Harmonica",
+      "sampleLength": 5382,
+      "sampleRate": 32000,
+      "rootKey": 64
+    },
+    {
+      "program": 23,
+      "success": true,
+      "presetName": "Bandoneon",
+      "instrumentName": "Bandoneon_1",
+      "sampleLength": 10602,
+      "sampleRate": 44100,
+      "rootKey": 54
+    },
+    {
+      "program": 24,
+      "success": true,
+      "presetName": "Nylon Guitar",
+      "instrumentName": "Nylon Guitar",
+      "sampleLength": 23649,
+      "sampleRate": 44100,
+      "rootKey": 53
+    },
+    {
+      "program": 25,
+      "success": true,
+      "presetName": "Steel Guitar",
+      "instrumentName": "Steel Guitar",
+      "sampleLength": 27327,
+      "sampleRate": 24000,
+      "rootKey": 40
+    },
+    {
+      "program": 26,
+      "success": true,
+      "presetName": "Jazz Guitar",
+      "instrumentName": "Jazz Guitar",
+      "sampleLength": 9448,
+      "sampleRate": 22050,
+      "rootKey": 40
+    },
+    {
+      "program": 27,
+      "success": true,
+      "presetName": "Clean Guitar",
+      "instrumentName": "Clean Guitar",
+      "sampleLength": 20692,
+      "sampleRate": 25000,
+      "rootKey": 40
+    },
+    {
+      "program": 28,
+      "success": true,
+      "presetName": "Muted Guitar",
+      "instrumentName": "Muted Guitar",
+      "sampleLength": 14839,
+      "sampleRate": 22050,
+      "rootKey": 47
+    },
+    {
+      "program": 29,
+      "success": true,
+      "presetName": "Overdrive Guitar",
+      "instrumentName": "Overdrive Guitar",
+      "sampleLength": 21938,
+      "sampleRate": 22050,
+      "rootKey": 38
+    },
+    {
+      "program": 30,
+      "success": true,
+      "presetName": "Distortion Guitar",
+      "instrumentName": "Distortion Guitar_1",
+      "sampleLength": 16576,
+      "sampleRate": 14998,
+      "rootKey": 40
+    },
+    {
+      "program": 31,
+      "success": true,
+      "presetName": "Guitar Harmonics",
+      "instrumentName": "Guitar Harmonics",
+      "sampleLength": 7935,
+      "sampleRate": 44100,
+      "rootKey": 62
+    },
+    {
+      "program": 32,
+      "success": true,
+      "presetName": "Acoustic Bass",
+      "instrumentName": "Acoustic Bass_1",
+      "sampleLength": 13824,
+      "sampleRate": 44100,
+      "rootKey": 72
+    },
+    {
+      "program": 33,
+      "success": true,
+      "presetName": "Finger Bass",
+      "instrumentName": "Finger Bass",
+      "sampleLength": 10549,
+      "sampleRate": 44100,
+      "rootKey": 54
+    },
+    {
+      "program": 34,
+      "success": true,
+      "presetName": "Pick Bass",
+      "instrumentName": "Pick Bass",
+      "sampleLength": 20723,
+      "sampleRate": 44100,
+      "rootKey": 42
+    },
+    {
+      "program": 35,
+      "success": true,
+      "presetName": "Fretless Bass",
+      "instrumentName": "Fretless Bass",
+      "sampleLength": 14957,
+      "sampleRate": 22050,
+      "rootKey": 32
+    },
+    {
+      "program": 36,
+      "success": true,
+      "presetName": "Slap Bass 1",
+      "instrumentName": "Slap Bass 1",
+      "sampleLength": 7585,
+      "sampleRate": 38000,
+      "rootKey": 24
+    },
+    {
+      "program": 37,
+      "success": true,
+      "presetName": "Slap Bass 2",
+      "instrumentName": "Slap Bass 2_F",
+      "sampleLength": 11911,
+      "sampleRate": 29762,
+      "rootKey": 33
+    },
+    {
+      "program": 38,
+      "success": true,
+      "presetName": "Synth Bass 1",
+      "instrumentName": "0 Pulse 37.5%",
+      "sampleLength": 1610,
+      "sampleRate": 44000,
+      "rootKey": 33
+    },
+    {
+      "program": 39,
+      "success": true,
+      "presetName": "Synth Bass 2",
+      "instrumentName": "Synth Bass 2_1",
+      "sampleLength": 22704,
+      "sampleRate": 44100,
+      "rootKey": 39
+    },
+    {
+      "program": 40,
+      "success": true,
+      "presetName": "Violin",
+      "instrumentName": "Violin_1",
+      "sampleLength": 36598,
+      "sampleRate": 27174,
+      "rootKey": 56
+    },
+    {
+      "program": 41,
+      "success": true,
+      "presetName": "Viola",
+      "instrumentName": "Viola",
+      "sampleLength": 29661,
+      "sampleRate": 30002,
+      "rootKey": 49
+    },
+    {
+      "program": 42,
+      "success": true,
+      "presetName": "Cello",
+      "instrumentName": "Cello_P",
+      "sampleLength": 40483,
+      "sampleRate": 29998,
+      "rootKey": 37
+    },
+    {
+      "program": 43,
+      "success": true,
+      "presetName": "Double Bass",
+      "instrumentName": "Double Bass",
+      "sampleLength": 14112,
+      "sampleRate": 33000,
+      "rootKey": 31
+    },
+    {
+      "program": 44,
+      "success": true,
+      "presetName": "Tremolo Strings",
+      "instrumentName": "Strings_2",
+      "sampleLength": 68615,
+      "sampleRate": 32000,
+      "rootKey": 36
+    },
+    {
+      "program": 45,
+      "success": true,
+      "presetName": "Pizzicato Strings",
+      "instrumentName": "Pizzicato Strings",
+      "sampleLength": 20739,
+      "sampleRate": 22505,
+      "rootKey": 46
+    },
+    {
+      "program": 46,
+      "success": true,
+      "presetName": "Orchestral Harp",
+      "instrumentName": "Orchestral Harp",
+      "sampleLength": 18349,
+      "sampleRate": 21605,
+      "rootKey": 52
+    },
+    {
+      "program": 47,
+      "success": true,
+      "presetName": "Timpani",
+      "instrumentName": "Timpani_1",
+      "sampleLength": 25643,
+      "sampleRate": 11025,
+      "rootKey": 50
+    },
+    {
+      "program": 48,
+      "success": true,
+      "presetName": "Fast Strings",
+      "instrumentName": "Strings_1",
+      "sampleLength": 73222,
+      "sampleRate": 32000,
+      "rootKey": 39
+    },
+    {
+      "program": 49,
+      "success": true,
+      "presetName": "Slow Strings",
+      "instrumentName": "Strings_1",
+      "sampleLength": 73222,
+      "sampleRate": 32000,
+      "rootKey": 39
+    },
+    {
+      "program": 50,
+      "success": true,
+      "presetName": "Synth Strings 1",
+      "instrumentName": "Synth Strings 1",
+      "sampleLength": 52485,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 51,
+      "success": true,
+      "presetName": "Synth Strings 2",
+      "instrumentName": "Synth Strings 2_2",
+      "sampleLength": 19109,
+      "sampleRate": 44100,
+      "rootKey": 57
+    },
+    {
+      "program": 52,
+      "success": true,
+      "presetName": "Concert Choir",
+      "instrumentName": "Concert Choir",
+      "sampleLength": 33542,
+      "sampleRate": 28000,
+      "rootKey": 45
+    },
+    {
+      "program": 53,
+      "success": true,
+      "presetName": "Voice Oohs",
+      "instrumentName": "Voice Oohs",
+      "sampleLength": 15996,
+      "sampleRate": 44100,
+      "rootKey": 63
+    },
+    {
+      "program": 54,
+      "success": true,
+      "presetName": "Synth Voice",
+      "instrumentName": "Synth Voice",
+      "sampleLength": 41212,
+      "sampleRate": 28800,
+      "rootKey": 55
+    },
+    {
+      "program": 55,
+      "success": true,
+      "presetName": "Orchestra Hit",
+      "instrumentName": "Orchestra Hit",
+      "sampleLength": 12684,
+      "sampleRate": 23000,
+      "rootKey": 76
+    },
+    {
+      "program": 56,
+      "success": true,
+      "presetName": "Trumpet",
+      "instrumentName": "Trumpet 3",
+      "sampleLength": 11011,
+      "sampleRate": 31245,
+      "rootKey": 58
+    },
+    {
+      "program": 57,
+      "success": true,
+      "presetName": "Trombone",
+      "instrumentName": "Trombone 3",
+      "sampleLength": 15893,
+      "sampleRate": 44100,
+      "rootKey": 37
+    },
+    {
+      "program": 58,
+      "success": true,
+      "presetName": "Tuba",
+      "instrumentName": "Tuba",
+      "sampleLength": 5063,
+      "sampleRate": 19980,
+      "rootKey": 30
+    },
+    {
+      "program": 59,
+      "success": true,
+      "presetName": "Muted Trumpet",
+      "instrumentName": "Muted Trumpet",
+      "sampleLength": 14253,
+      "sampleRate": 30637,
+      "rootKey": 62
+    },
+    {
+      "program": 60,
+      "success": true,
+      "presetName": "French Horns",
+      "instrumentName": "French Horns_1",
+      "sampleLength": 39683,
+      "sampleRate": 44100,
+      "rootKey": 63
+    },
+    {
+      "program": 61,
+      "success": true,
+      "presetName": "Brass Section",
+      "instrumentName": "Brass Section",
+      "sampleLength": 100432,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 62,
+      "success": true,
+      "presetName": "Synth Brass 1",
+      "instrumentName": "0 Saw",
+      "sampleLength": 2008,
+      "sampleRate": 44000,
+      "rootKey": 33
+    },
+    {
+      "program": 63,
+      "success": true,
+      "presetName": "Synth Brass 2",
+      "instrumentName": "0 Saw",
+      "sampleLength": 2008,
+      "sampleRate": 44000,
+      "rootKey": 33
+    },
+    {
+      "program": 64,
+      "success": true,
+      "presetName": "Soprano Sax",
+      "instrumentName": "Soprano Sax",
+      "sampleLength": 17459,
+      "sampleRate": 44100,
+      "rootKey": 69
+    },
+    {
+      "program": 65,
+      "success": true,
+      "presetName": "Alto Sax",
+      "instrumentName": "Alto Sax",
+      "sampleLength": 21818,
+      "sampleRate": 44100,
+      "rootKey": 53
+    },
+    {
+      "program": 66,
+      "success": true,
+      "presetName": "Tenor Sax",
+      "instrumentName": "Tenor Sax",
+      "sampleLength": 5464,
+      "sampleRate": 44100,
+      "rootKey": 54
+    },
+    {
+      "program": 67,
+      "success": true,
+      "presetName": "Baritone Sax",
+      "instrumentName": "Baritone Sax",
+      "sampleLength": 13696,
+      "sampleRate": 44100,
+      "rootKey": 50
+    },
+    {
+      "program": 68,
+      "success": true,
+      "presetName": "Oboe",
+      "instrumentName": "Oboe",
+      "sampleLength": 30557,
+      "sampleRate": 24947,
+      "rootKey": 61
+    },
+    {
+      "program": 69,
+      "success": true,
+      "presetName": "English Horn",
+      "instrumentName": "English Horn",
+      "sampleLength": 11467,
+      "sampleRate": 27174,
+      "rootKey": 58
+    },
+    {
+      "program": 70,
+      "success": true,
+      "presetName": "Bassoon",
+      "instrumentName": "Bassoon",
+      "sampleLength": 5973,
+      "sampleRate": 33000,
+      "rootKey": 36
+    },
+    {
+      "program": 71,
+      "success": true,
+      "presetName": "Clarinet",
+      "instrumentName": "Clarinet",
+      "sampleLength": 4293,
+      "sampleRate": 16796,
+      "rootKey": 53
+    },
+    {
+      "program": 72,
+      "success": true,
+      "presetName": "Piccolo",
+      "instrumentName": "Piccolo",
+      "sampleLength": 19535,
+      "sampleRate": 27778,
+      "rootKey": 82
+    },
+    {
+      "program": 73,
+      "success": true,
+      "presetName": "Flute",
+      "instrumentName": "Flute",
+      "sampleLength": 29646,
+      "sampleRate": 32000,
+      "rootKey": 61
+    },
+    {
+      "program": 74,
+      "success": true,
+      "presetName": "Recorder",
+      "instrumentName": "Recorder",
+      "sampleLength": 39296,
+      "sampleRate": 45000,
+      "rootKey": 62
+    },
+    {
+      "program": 75,
+      "success": true,
+      "presetName": "Pan Flute",
+      "instrumentName": "Pan Flute",
+      "sampleLength": 32355,
+      "sampleRate": 30000,
+      "rootKey": 81
+    },
+    {
+      "program": 76,
+      "success": true,
+      "presetName": "Bottle Blow",
+      "instrumentName": "Bottle Blow_1",
+      "sampleLength": 31616,
+      "sampleRate": 22050,
+      "rootKey": 54
+    },
+    {
+      "program": 77,
+      "success": true,
+      "presetName": "Shakuhachi",
+      "instrumentName": "Shakuhachi",
+      "sampleLength": 65678,
+      "sampleRate": 44100,
+      "rootKey": 111
+    },
+    {
+      "program": 78,
+      "success": true,
+      "presetName": "Whistle",
+      "instrumentName": "0 Sine",
+      "sampleLength": 1024,
+      "sampleRate": 48000,
+      "rootKey": 42
+    },
+    {
+      "program": 79,
+      "success": true,
+      "presetName": "Ocarina",
+      "instrumentName": "Ocarina",
+      "sampleLength": 41740,
+      "sampleRate": 25000,
+      "rootKey": 73
+    },
+    {
+      "program": 80,
+      "success": true,
+      "presetName": "Square Lead",
+      "instrumentName": "0 Pulse 50%",
+      "sampleLength": 2008,
+      "sampleRate": 44000,
+      "rootKey": 33
+    },
+    {
+      "program": 81,
+      "success": true,
+      "presetName": "Saw Lead",
+      "instrumentName": "0 Saw",
+      "sampleLength": 2008,
+      "sampleRate": 44000,
+      "rootKey": 33
+    },
+    {
+      "program": 82,
+      "success": true,
+      "presetName": "Synth Calliope",
+      "instrumentName": "0 Triangle",
+      "sampleLength": 2002,
+      "sampleRate": 44000,
+      "rootKey": 33
+    },
+    {
+      "program": 83,
+      "success": true,
+      "presetName": "Chiffer Lead",
+      "instrumentName": "Polysynth_1",
+      "sampleLength": 52485,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 84,
+      "success": true,
+      "presetName": "Charang",
+      "instrumentName": "Charang_2",
+      "sampleLength": 16576,
+      "sampleRate": 14998,
+      "rootKey": 40
+    },
+    {
+      "program": 85,
+      "success": true,
+      "presetName": "Solo Vox",
+      "instrumentName": "Solo Vox_1",
+      "sampleLength": 6738,
+      "sampleRate": 22050,
+      "rootKey": 55
+    },
+    {
+      "program": 86,
+      "success": true,
+      "presetName": "5th Saw Wave",
+      "instrumentName": "5th Saw Wave",
+      "sampleLength": 53652,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 87,
+      "success": true,
+      "presetName": "Bass & Lead",
+      "instrumentName": "0 Pulse 37.5%",
+      "sampleLength": 1610,
+      "sampleRate": 44000,
+      "rootKey": 33
+    },
+    {
+      "program": 88,
+      "success": true,
+      "presetName": "Fantasia",
+      "instrumentName": "DX7_1",
+      "sampleLength": 9353,
+      "sampleRate": 11025,
+      "rootKey": 60
+    },
+    {
+      "program": 89,
+      "success": true,
+      "presetName": "Warm Pad",
+      "instrumentName": "Warm Pad",
+      "sampleLength": 68615,
+      "sampleRate": 32000,
+      "rootKey": 36
+    },
+    {
+      "program": 90,
+      "success": true,
+      "presetName": "Polysynth",
+      "instrumentName": "Polysynth_1",
+      "sampleLength": 52485,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 91,
+      "success": true,
+      "presetName": "Space Voice",
+      "instrumentName": "Solo Vox_1",
+      "sampleLength": 6738,
+      "sampleRate": 22050,
+      "rootKey": 55
+    },
+    {
+      "program": 92,
+      "success": true,
+      "presetName": "Bowed Glass",
+      "instrumentName": "Bowed Glass",
+      "sampleLength": 24868,
+      "sampleRate": 48000,
+      "rootKey": 64
+    },
+    {
+      "program": 93,
+      "success": true,
+      "presetName": "Metal Pad",
+      "instrumentName": "Synth Strings 2_1",
+      "sampleLength": 19109,
+      "sampleRate": 44100,
+      "rootKey": 57
+    },
+    {
+      "program": 94,
+      "success": true,
+      "presetName": "Halo Pad",
+      "instrumentName": "Synth Strings",
+      "sampleLength": 52485,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 95,
+      "success": true,
+      "presetName": "Sweep Pad",
+      "instrumentName": "Synth Strings",
+      "sampleLength": 52485,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 96,
+      "success": true,
+      "presetName": "Ice Rain",
+      "instrumentName": "Ice Rain_1",
+      "sampleLength": 53652,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 97,
+      "success": true,
+      "presetName": "Soundtrack",
+      "instrumentName": "Soundtrack",
+      "sampleLength": 32951,
+      "sampleRate": 44100,
+      "rootKey": 84
+    },
+    {
+      "program": 98,
+      "success": true,
+      "presetName": "Crystal",
+      "instrumentName": "Crystal_2",
+      "sampleLength": 25341,
+      "sampleRate": 48000,
+      "rootKey": 64
+    },
+    {
+      "program": 99,
+      "success": true,
+      "presetName": "Atmosphere",
+      "instrumentName": "Atmosphere",
+      "sampleLength": 23649,
+      "sampleRate": 44100,
+      "rootKey": 53
+    },
+    {
+      "program": 100,
+      "success": true,
+      "presetName": "Brightness",
+      "instrumentName": "Bright Saw Stack",
+      "sampleLength": 52485,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 101,
+      "success": true,
+      "presetName": "Goblin",
+      "instrumentName": "Goblin",
+      "sampleLength": 11148,
+      "sampleRate": 44100,
+      "rootKey": 72
+    },
+    {
+      "program": 102,
+      "success": true,
+      "presetName": "Echo Drops",
+      "instrumentName": "Halo Pad",
+      "sampleLength": 41212,
+      "sampleRate": 28800,
+      "rootKey": 55
+    },
+    {
+      "program": 103,
+      "success": true,
+      "presetName": "Star Theme",
+      "instrumentName": "Synth Strings 2_1",
+      "sampleLength": 19109,
+      "sampleRate": 44100,
+      "rootKey": 57
+    },
+    {
+      "program": 104,
+      "success": true,
+      "presetName": "Sitar",
+      "instrumentName": "Sitar",
+      "sampleLength": 39475,
+      "sampleRate": 22050,
+      "rootKey": 43
+    },
+    {
+      "program": 105,
+      "success": true,
+      "presetName": "Banjo",
+      "instrumentName": "Banjo",
+      "sampleLength": 7553,
+      "sampleRate": 44100,
+      "rootKey": 54
+    },
+    {
+      "program": 106,
+      "success": true,
+      "presetName": "Shamisen",
+      "instrumentName": "Shamisen",
+      "sampleLength": 1240,
+      "sampleRate": 44100,
+      "rootKey": 64
+    },
+    {
+      "program": 107,
+      "success": true,
+      "presetName": "Koto",
+      "instrumentName": "Koto",
+      "sampleLength": 33213,
+      "sampleRate": 31250,
+      "rootKey": 57
+    },
+    {
+      "program": 108,
+      "success": true,
+      "presetName": "Kalimba",
+      "instrumentName": "Kalimba",
+      "sampleLength": 9390,
+      "sampleRate": 44100,
+      "rootKey": 68
+    },
+    {
+      "program": 109,
+      "success": true,
+      "presetName": "Bagpipes",
+      "instrumentName": "Bagpipes",
+      "sampleLength": 28680,
+      "sampleRate": 44100,
+      "rootKey": 72
+    },
+    {
+      "program": 110,
+      "success": true,
+      "presetName": "Fiddle",
+      "instrumentName": "Violin_1",
+      "sampleLength": 36598,
+      "sampleRate": 27174,
+      "rootKey": 56
+    },
+    {
+      "program": 111,
+      "success": true,
+      "presetName": "Shenai",
+      "instrumentName": "Shenai",
+      "sampleLength": 622,
+      "sampleRate": 44100,
+      "rootKey": 70
+    },
+    {
+      "program": 112,
+      "success": true,
+      "presetName": "Tinker Bell",
+      "instrumentName": "Tinker Bell",
+      "sampleLength": 10063,
+      "sampleRate": 44100,
+      "rootKey": 102
+    },
+    {
+      "program": 113,
+      "success": true,
+      "presetName": "Agogo",
+      "instrumentName": "Agogo",
+      "sampleLength": 6341,
+      "sampleRate": 44100,
+      "rootKey": 72
+    },
+    {
+      "program": 114,
+      "success": true,
+      "presetName": "Steel Drums",
+      "instrumentName": "Steel Drums",
+      "sampleLength": 25910,
+      "sampleRate": 29761,
+      "rootKey": 60
+    },
+    {
+      "program": 115,
+      "success": true,
+      "presetName": "Wood Block",
+      "instrumentName": "Wood Block_1",
+      "sampleLength": 1798,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 116,
+      "success": true,
+      "presetName": "Taiko Drum",
+      "instrumentName": "Taiko Drum",
+      "sampleLength": 11853,
+      "sampleRate": 22050,
+      "rootKey": 60
+    },
+    {
+      "program": 117,
+      "success": true,
+      "presetName": "Melodic Tom",
+      "instrumentName": "Melodic Tom",
+      "sampleLength": 23712,
+      "sampleRate": 32000,
+      "rootKey": 60
+    },
+    {
+      "program": 118,
+      "success": true,
+      "presetName": "Synth Drum",
+      "instrumentName": "Synth Drum",
+      "sampleLength": 14998,
+      "sampleRate": 44100,
+      "rootKey": 72
+    },
+    {
+      "program": 119,
+      "success": true,
+      "presetName": "Reverse Cymbal",
+      "instrumentName": "Reverse Cymbal",
+      "sampleLength": 39341,
+      "sampleRate": 28000,
+      "rootKey": 72
+    },
+    {
+      "program": 120,
+      "success": true,
+      "presetName": "Fret Noise",
+      "instrumentName": "Fret Noise",
+      "sampleLength": 7783,
+      "sampleRate": 44100,
+      "rootKey": 69
+    },
+    {
+      "program": 121,
+      "success": true,
+      "presetName": "Breath Noise",
+      "instrumentName": "Breath Noise",
+      "sampleLength": 7417,
+      "sampleRate": 28000,
+      "rootKey": 61
+    },
+    {
+      "program": 122,
+      "success": true,
+      "presetName": "Seashore",
+      "instrumentName": "Seashore",
+      "sampleLength": 20853,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 123,
+      "success": true,
+      "presetName": "Birds",
+      "instrumentName": "Birds",
+      "sampleLength": 107999,
+      "sampleRate": 32000,
+      "rootKey": 60
+    },
+    {
+      "program": 124,
+      "success": true,
+      "presetName": "Telephone 1",
+      "instrumentName": "Telephone 1",
+      "sampleLength": 1584,
+      "sampleRate": 44100,
+      "rootKey": 60
+    },
+    {
+      "program": 125,
+      "success": true,
+      "presetName": "Helicopter",
+      "instrumentName": "Helicopter",
+      "sampleLength": 12910,
+      "sampleRate": 44100,
+      "rootKey": 38
+    },
+    {
+      "program": 126,
+      "success": true,
+      "presetName": "Applause",
+      "instrumentName": "Applause",
+      "sampleLength": 89498,
+      "sampleRate": 25000,
+      "rootKey": 111
+    },
+    {
+      "program": 127,
+      "success": true,
+      "presetName": "Gun Shot",
+      "instrumentName": "Gun Shot",
+      "sampleLength": 10420,
+      "sampleRate": 44100,
+      "rootKey": 60
+    }
+  ]
+}

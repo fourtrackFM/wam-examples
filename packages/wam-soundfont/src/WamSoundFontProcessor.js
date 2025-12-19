@@ -74,28 +74,6 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			/** @private Track current program number */
 			this._currentProgram = 0;
 
-			// Set up message handler immediately in constructor
-			const originalOnMessage = this.port.onmessage;
-			this.port.onmessage = (event) => {
-				if (event.data.type === 'loadSoundFont') {
-					console.log(
-						'[Processor] Received SoundFont data, sample length:',
-						event.data.data.sampleData?.length
-					);
-					if (this._synth) {
-						// @ts-ignore
-						this._synth.loadSoundFontData(event.data.data);
-					} else {
-						this._pendingSoundFontData = event.data.data;
-					}
-				} else if (originalOnMessage) {
-					originalOnMessage.call(this.port, event);
-				}
-			};
-
-			console.log(
-				'[Processor] Constructor complete, message handler set'
-			);
 		}
 
 		/**
@@ -108,7 +86,7 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 				bypass: new WamParameterInfo('bypass', {
 					type: 'boolean',
 					label: 'Bypass',
-					defaultValue: false,
+					defaultValue: 0,
 				}),
 				program: new WamParameterInfo('program', {
 					type: 'int',
@@ -169,15 +147,23 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 				this._synth.noteOn(channel, data1, data2);
 			} else if (type === 0xc0) {
 				// MIDI program change
-				this._synth.programChange(data1);
+				const newProgram = data1;
+				if (newProgram !== this._currentProgram) {
+					this._currentProgram = newProgram;
+					// Request the Node to load this program
+					this.port.postMessage({
+						type: 'requestProgramLoad',
+						program: newProgram,
+					});
+				}
+				this._synth.programChange(newProgram);
 			}
-			// Ignore other MIDI messages (CC, pitch bend, etc.) for offline rendering performance
 		}
 
 		/**
-		 * Implement custom DSP here.
-		 * @param {number} startSample beginning of processing slice
-		 * @param {number} endSample end of processing slice
+		 * Process audio - called by the base class process() method
+		 * @param {number} startSample
+		 * @param {number} endSample
 		 * @param {Float32Array[][]} inputs
 		 * @param {Float32Array[][]} outputs
 		 */
@@ -185,19 +171,8 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			const input = inputs[0];
 			const output = outputs[0];
 
+			// Process audio through the synth
 			this._synth.process(startSample, endSample, input, output);
-
-			// Check if we have any non-zero output
-			let hasOutput = false;
-			for (let c = 0; c < output.length; c++) {
-				for (let i = startSample; i < endSample; i++) {
-					if (output[c][i] !== 0) {
-						hasOutput = true;
-						break;
-					}
-				}
-				if (hasOutput) break;
-			}
 		}
 	}
 

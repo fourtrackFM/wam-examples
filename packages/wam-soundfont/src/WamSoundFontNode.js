@@ -67,6 +67,11 @@ export default class WamExampleTemplateNode extends WamNode {
 
 		/** @private @type {string} */
 		this._soundfontUrl = 'https://static.fourtrack.fm/GeneralUser-GS.sf2';
+		/** @private @type {ArrayBuffer} */
+		this._sf2Buffer = null;
+
+		/** @private @type {Set<number>} */
+		this._loadedPrograms = new Set();
 
 		/** @private @type {number} */
 		this._currentProgram = 0;
@@ -99,41 +104,75 @@ export default class WamExampleTemplateNode extends WamNode {
 				arrayBuffer.byteLength
 			);
 
-			// Load first 10 programs (0-9) to start
-			// TODO: Load on demand or parse all presets
-			for (let program = 0; program < 10; program++) {
-				// Parse the SF2 file for this program
-				const sf2Data = parseSF2(arrayBuffer, program);
-				if (!sf2Data || !sf2Data.sampleData) {
-					console.warn('[Node] No data for program', program);
-					continue;
-				}
+			// Store a copy of the buffer for on-demand loading
+			// We need to keep our own copy because we'll transfer the original
+			this._sf2Buffer = arrayBuffer.slice(0);
 
-				console.log(
-					'[Node] Program',
-					program,
-					'parsed, sample data length:',
-					sf2Data.sampleData?.length
-				);
+			// Send the full SF2 buffer to the processor for on-demand loading
+			const bufferMessage = {
+				type: 'setSF2Buffer',
+				data: arrayBuffer,
+			};
+			this.port.postMessage(bufferMessage, [arrayBuffer]);
 
-				// Send parsed data to processor using transferable objects for zero-copy
-				const message = {
-					type: 'loadSoundFont',
-					data: {
-						sampleData: sf2Data.sampleData,
-						selectedSample: sf2Data.selectedSample,
-						sampleRate: sf2Data.sampleRate,
-						program: sf2Data.program,
-					},
-				};
-				// Transfer the ArrayBuffer to avoid copying
-				this.port.postMessage(message, [sf2Data.sampleData.buffer]);
-			}
+			// Load first program (0) to start
+			await this._loadProgram(0);
 
 			this._soundfontLoaded = true;
-			console.log('[Node] SoundFont programs sent to processor');
+			console.log('[Node] SoundFont initialized');
 		} catch (error) {
 			console.error('[Node] Error loading SoundFont:', error);
+		}
+	}
+
+	/**
+	 * Load a specific program from the SF2 file
+	 * @param {number} program - MIDI program number (0-127)
+	 */
+	async _loadProgram(program) {
+		if (this._loadedPrograms.has(program)) {
+			console.log('[Node] Program', program, 'already loaded');
+			return;
+		}
+
+		if (!this._sf2Buffer) {
+			console.error('[Node] SF2 buffer not loaded yet');
+			return;
+		}
+
+		try {
+			// Parse the SF2 file for this program
+			const sf2Data = parseSF2(this._sf2Buffer, program);
+			if (!sf2Data || !sf2Data.sampleData) {
+				console.warn('[Node] No data for program', program);
+				return;
+			}
+
+			console.log(
+				'[Node] Program',
+				program,
+				'parsed:',
+				sf2Data.presetName,
+				'sample length:',
+				sf2Data.sampleData?.length
+			);
+
+			// Send parsed data to processor using transferable objects for zero-copy
+			const message = {
+				type: 'loadSoundFont',
+				data: {
+					sampleData: sf2Data.sampleData,
+					selectedSample: sf2Data.selectedSample,
+					sampleRate: sf2Data.sampleRate,
+					program: sf2Data.program,
+				},
+			};
+			// Transfer the ArrayBuffer to avoid copying
+			this.port.postMessage(message, [sf2Data.sampleData.buffer]);
+
+			this._loadedPrograms.add(program);
+		} catch (error) {
+			console.error('[Node] Error loading program', program, ':', error);
 		}
 	}
 

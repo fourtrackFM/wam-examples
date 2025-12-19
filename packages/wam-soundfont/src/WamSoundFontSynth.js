@@ -30,15 +30,16 @@ const getWamExampleTemplateSynth = (moduleId) => {
 	const { WamParameterInfo } = ModuleScope;
 
 	/**
-	 * @param {number} note
+	 * Convert MIDI note number to frequency in Hz
+	 * @param {number} note - MIDI note number
+	 * @returns {number} frequency in Hz
 	 */
 	function noteToHz(note) {
-		return 2.0 ** ((note - 69) / 12.0) * 440.0;
+		return Math.pow(2.0, (note - 69) / 12.0) * 440.0;
 	}
 
 	/**
-	 * Template for synth part (mono output)
-	 *
+	 * Synth part for mono channel rendering with sample playback
 	 * @class
 	 */
 	class WamExampleTemplateSynthPart {
@@ -47,46 +48,19 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 * @param {number} sampleRate
 		 */
 		constructor(samplesPerQuantum, sampleRate) {
-			/** @private @type {number} current sample rate */
 			this._sampleRate = sampleRate;
-
-			/** @private @type {number} current gain */
 			this._gain = 0.0;
-
-			/** @private @type {number} oscillator phase */
-			this._phase = 0.0;
-
-			/** @private @type {number} phase increment per sample */
-			this._phaseIncrement = 0.0;
-
-			/** @private @type {boolean} whether or not the part is currently active */
 			this._active = false;
-
-			/** @private @type {Int16Array} sample data from soundfont */
 			this._sampleData = null;
-
-			/** @private @type {number} current position in sample playback */
 			this._samplePosition = 0;
-
-			/** @private @type {number} playback speed ratio */
 			this._playbackRate = 1.0;
-
-			/** @private @type {number} root key from sample metadata */
-			this._rootKey = 60; // Default middle C
-
-			/** @private @type {number} sample loop start */
+			this._rootKey = 60;
 			this._loopStart = 0;
-
-			/** @private @type {number} sample loop end */
 			this._loopEnd = 0;
 		}
 
-		/**
-		 * Put the part into idle state
-		 */
 		reset() {
 			this._active = false;
-			this._phase = 0.0;
 			this._gain = 0.0;
 			this._samplePosition = 0;
 		}
@@ -96,40 +70,32 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 * @param {Int16Array} sampleData
 		 * @param {Object} metadata - Sample metadata with rootKey and loop points
 		 */
-		setSampleData(sampleData, metadata = {}) {
+		setSampleData(sampleData, metadata) {
 			this._sampleData = sampleData;
 			this._rootKey = metadata.rootKey || 60;
 			this._loopStart = metadata.loopStart || 0;
 			this._loopEnd =
 				metadata.loopEnd || (sampleData ? sampleData.length : 0);
-			console.log('[Part] Sample metadata:', {
-				rootKey: this._rootKey,
-				loopStart: this._loopStart,
-				loopEnd: this._loopEnd,
-				sampleLength: sampleData ? sampleData.length : 0,
-			});
 		}
 
 		/**
-		 * Trigger envelope attack and start oscillator(s)
+		 * Start playing a note
 		 * @param {number} gain - velocity-based gain
 		 * @param {number} frequency - frequency in Hz
 		 */
 		start(gain, frequency) {
 			this._active = true;
 			this._gain = gain * 0.3;
-			this._phase = 0.0;
-			this._phaseIncrement = (frequency * 2 * Math.PI) / this._sampleRate;
 			this._samplePosition = 0;
+
 			// Calculate playback rate based on root key
-			// Convert MIDI note to frequency: f = 440 * 2^((n-69)/12)
 			const rootFreq = 440.0 * Math.pow(2.0, (this._rootKey - 69) / 12.0);
 			this._playbackRate = frequency / rootFreq;
 		}
 
 		/**
-		 * Trigger envelope release
-		 * @param {boolean} force whether or not to force a fast release
+		 * Stop playing
+		 * @param {boolean} force
 		 */
 		stop(force) {
 			this._active = false;
@@ -137,61 +103,50 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		}
 
 		/**
-		 * Add output to the signal buffer
-		 * @param {number} startSample beginning of processing slice
-		 * @param {number} endSample end of processing slice
-		 * @param {Float32Array} signal single-channel signal buffer
+		 * Process audio output
+		 * @param {number} startSample
+		 * @param {number} endSample
+		 * @param {Float32Array} signal
+		 * @returns {boolean} whether still active
 		 */
 		process(startSample, endSample, signal) {
-			if (!this._active) {
+			if (
+				!this._active ||
+				!this._sampleData ||
+				this._sampleData.length === 0
+			) {
 				return false;
 			}
 
-			let n = startSample;
-			while (n < endSample) {
-				if (this._sampleData && this._sampleData.length > 0) {
-					// Play back sample data with pitch shifting and looping
-					const sampleIndex = Math.floor(this._samplePosition);
+			for (let n = startSample; n < endSample; n++) {
+				const sampleIndex = Math.floor(this._samplePosition);
 
-					// Check if we've reached the end
-					if (sampleIndex >= this._sampleData.length) {
-						// If loop points are valid, loop back
-						if (
-							this._loopEnd > this._loopStart &&
-							this._loopStart >= 0
-						) {
-							const loopLength = this._loopEnd - this._loopStart;
-							this._samplePosition =
-								this._loopStart +
-								((sampleIndex - this._loopEnd) % loopLength);
-						} else {
-							// No loop, end playback
-							this._active = false;
-							break;
-						}
-					}
-
-					const finalIndex = Math.floor(this._samplePosition);
+				// Handle looping
+				if (sampleIndex >= this._loopEnd) {
 					if (
-						finalIndex >= 0 &&
-						finalIndex < this._sampleData.length
+						this._loopEnd > this._loopStart &&
+						this._loopStart >= 0
 					) {
-						// Convert Int16 to float (-1 to 1)
-						const sampleValue =
-							this._sampleData[finalIndex] / 32768.0;
-						signal[n] += this._gain * sampleValue;
-						this._samplePosition += this._playbackRate;
+						const loopLength = this._loopEnd - this._loopStart;
+						this._samplePosition =
+							this._loopStart +
+							((sampleIndex - this._loopEnd) % loopLength);
 					} else {
 						this._active = false;
-						break;
+						return false;
 					}
-				} else {
-					// Fallback to sine wave if no sample data
-					signal[n] += this._gain * Math.sin(this._phase);
-					this._phase += this._phaseIncrement;
-					if (this._phase >= 2 * Math.PI) this._phase -= 2 * Math.PI;
 				}
-				n++;
+
+				const finalIndex = Math.floor(this._samplePosition);
+				if (finalIndex >= 0 && finalIndex < this._sampleData.length) {
+					// Convert Int16 to float32 (-1 to 1)
+					const sampleValue = this._sampleData[finalIndex] / 32768.0;
+					signal[n] += this._gain * sampleValue;
+					this._samplePosition += this._playbackRate;
+				} else {
+					this._active = false;
+					return false;
+				}
 			}
 
 			return this._active;
@@ -199,55 +154,35 @@ const getWamExampleTemplateSynth = (moduleId) => {
 	}
 
 	/**
-	 * Template for stereo synth voice
-	 *
+	 * Stereo voice with left and right parts
 	 * @class
 	 */
 	class WamExampleTemplateSynthVoice {
 		/**
 		 * @param {number} samplesPerQuantum
 		 * @param {number} sampleRate
-		 * @param {number} voiceIdx unique int to identify voice
+		 * @param {number} voiceIdx
 		 */
 		constructor(samplesPerQuantum, sampleRate, voiceIdx) {
-			/** @private @type {number} just two (stereo) */
 			this._numChannels = 2;
-
-			/** @private @type {number} current sample rate */
 			this._sampleRate = sampleRate;
-
-			/** @private @type {number} current MIDI channel (when active) */
 			this._channel = -1;
-
-			/** @private @type {number} current MIDI note (when active) */
 			this._note = -1;
-
-			/** @private @type {number} current MIDI velocity (when active) */
 			this._velocity = -1;
-
-			/** @private @type {number} time corresponding to when current note began (when active) */
 			this._timestamp = -1;
-
-			/** @private @type {boolean} whether or not the voice is currently active */
 			this._active = false;
-
-			/** @private @type {number} counter to track number of times note-off has been received */
 			this._deactivating = 0;
 
-			/** @private @type {WamExampleTemplateSynthPart} part for rendering left channel */
 			this._leftPart = new WamExampleTemplateSynthPart(
 				samplesPerQuantum,
 				sampleRate
 			);
-
-			/** @private @type {WamExampleTemplateSynthPart} part for rendering right channel */
 			this._rightPart = new WamExampleTemplateSynthPart(
 				samplesPerQuantum,
 				sampleRate
 			);
 		}
 
-		// read-only properties
 		get channel() {
 			return this._channel;
 		}
@@ -265,18 +200,15 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		}
 
 		/**
-		 * Check if the voice is on the channel and note
-		 * @param {number} channel MIDI channel number
-		 * @param {number} note MIDI note number
+		 * Check if voice matches channel and note
+		 * @param {number} channel
+		 * @param {number} note
 		 * @returns {boolean}
 		 */
 		matches(channel, note) {
 			return this._channel === channel && this._note === note;
 		}
 
-		/**
-		 * Put the voice into idle state
-		 */
 		reset() {
 			this._channel = -1;
 			this._note = -1;
@@ -284,28 +216,25 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			this._timestamp = -1;
 			this._active = false;
 			this._deactivating = 0;
-
 			this._leftPart.reset();
 			this._rightPart.reset();
 		}
 
 		/**
-		 * Trigger the attack of a new note
-		 * @param {number} channel MIDI channel number
-		 * @param {number} note MIDI note number
-		 * @param {number} velocity MIDI velocity number
+		 * Trigger note on
+		 * @param {number} channel
+		 * @param {number} note
+		 * @param {number} velocity
 		 */
 		noteOn(channel, note, velocity) {
-			console.log(
-				`Voice noteOn: channel ${channel} note ${note} velocity ${velocity}`
-			);
 			this._channel = channel;
 			this._note = note;
 			this._velocity = velocity;
 			this._timestamp = globalThis.currentTime;
 			this._active = true;
 			this._deactivating = 0;
-			const gain = this.velocity / 127;
+
+			const gain = velocity / 127;
 			const frequency = noteToHz(note);
 
 			this._leftPart.start(gain, frequency);
@@ -313,12 +242,11 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		}
 
 		/**
-		 * Trigger the release of an active note
-		 * @param {number} channel MIDI channel number
-		 * @param {number} note MIDI note number
-		 * @param {number} velocity MIDI velocity number
+		 * Trigger note off
+		 * @param {number} channel
+		 * @param {number} note
+		 * @param {number} velocity
 		 */
-		// eslint-disable-next-line no-unused-vars
 		noteOff(channel, note, velocity) {
 			this._deactivating += 1;
 			const force = this._deactivating > 2;
@@ -327,15 +255,17 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		}
 
 		/**
-		 * Add output from each part to the output buffers
-		 * @param {number} startSample beginning of processing slice
-		 * @param {number} endSample end of processing slice
+		 * Process audio for this voice
+		 * @param {number} startSample
+		 * @param {number} endSample
 		 * @param {Float32Array[]} inputs
 		 * @param {Float32Array[]} outputs
-		 * @returns {boolean} whether or not the voice is still active
+		 * @returns {boolean}
 		 */
 		process(startSample, endSample, inputs, outputs) {
-			if (!this._active) return false;
+			if (!this._active) {
+				return false;
+			}
 
 			const leftActive = this._leftPart.process(
 				startSample,
@@ -354,8 +284,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 	}
 
 	/**
-	 * Example polyphonic stereo synth.
-	 *
+	 * Main polyphonic SoundFont synthesizer
 	 * @class
 	 * @implements {IWamExampleTemplateSynth}
 	 */
@@ -364,32 +293,24 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 * @param {WamParameterInterpolatorMap} parameterInterpolators
 		 * @param {number} samplesPerQuantum
 		 * @param {number} sampleRate
-		 * @param {Object} config optional config object
+		 * @param {Object} config
 		 */
-		/* eslint-disable-next-line no-unused-vars */
 		constructor(
 			parameterInterpolators,
 			samplesPerQuantum,
 			sampleRate,
-			config = {}
+			config
 		) {
-			/** @private @type {number} just two (stereo) */
+			config = config || {};
 			this._numChannels = 2;
-
-			/** @private @type {number} number of voices allocated */
-			this._numVoices = config.numVoices ?? 16;
-
-			/** @private @type {boolean} whether or not to add the input to the synth's output */
-			this._passInput = config.passInput ?? false;
-
-			/** @private @type {Uint8Array} array of voice state flags */
+			this._numVoices = config.numVoices || 16;
+			this._passInput = config.passInput || false;
 			this._voiceStates = new Uint8Array(this._numVoices);
 			this._voiceStates.fill(0);
 
-			/** @private @type {WamExampleTemplateSynthVoice[]} list of allocated voices */
+			// Allocate voices
 			this._voices = [];
-			let i = 0;
-			while (i < this._numVoices) {
+			for (let i = 0; i < this._numVoices; i++) {
 				this._voices.push(
 					new WamExampleTemplateSynthVoice(
 						samplesPerQuantum,
@@ -397,45 +318,40 @@ const getWamExampleTemplateSynth = (moduleId) => {
 						i
 					)
 				);
-				i++;
 			}
 
-			/** @private @type {ArrayBuffer} full soundfont file buffer */
-			this._sf2Buffer = null;
-
-			/** @private @type {Map<number, Object>} map of program number to sample data */
+			// Program management
 			this._programMap = new Map();
-
-			/** @private @type {number} current program number */
 			this._currentProgram = 0;
+			this._sampleData = null;
 		}
 
 		/**
 		 * Handle MIDI program change
-		 * @param {number} program - MIDI program number (0-127)
+		 * @param {number} program
 		 */
 		programChange(program) {
 			if (program === this._currentProgram) {
-				console.log(
-					'[Synth] Program change to same program, no action taken'
-				);
-				return; // No change
+				console.log('[Synth] Program', program, 'already active');
+				return;
+			}
+
+			const programData = this._programMap.get(program);
+			if (!programData) {
+				console.warn('[Synth] Program', program, 'not loaded yet');
+				return;
 			}
 
 			this._currentProgram = program;
-			// Load the sample data for this program
-			const programData = this._programMap.get(program);
 			this._sampleData = programData.sampleData;
 
-			// Update all voices with the new sample data
+			// Update all voices with new sample data
 			const metadata = programData.metadata;
 			for (let i = 0; i < this._numVoices; i++) {
-				// @ts-ignore
 				this._voices[i]._leftPart.setSampleData(
 					this._sampleData,
 					metadata
 				);
-				// @ts-ignore
 				this._voices[i]._rightPart.setSampleData(
 					this._sampleData,
 					metadata
@@ -445,15 +361,19 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			console.log(
 				'[Synth] Switched to program',
 				program,
-				', sample length:',
-				this._sampleData?.length
+				'sample length:',
+				this._sampleData ? this._sampleData.length : 0
 			);
 		}
 
+		/**
+		 * Load SoundFont data for a program
+		 * @param {Object} data
+		 */
 		loadSoundFontData(data) {
 			console.log('[Synth] Loading SoundFont data', data);
 
-			// Extract metadata from selected sample
+			// Extract metadata
 			const metadata = {};
 			if (data.selectedSample) {
 				metadata.rootKey =
@@ -466,25 +386,21 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				console.log('[Synth] Sample metadata:', metadata);
 			}
 
-			// Store this program's data in the map
+			// Store program data
 			const program = data.program || 0;
 			this._programMap.set(program, {
 				sampleData: data.sampleData,
 				metadata: metadata,
 			});
 
-			// If this is the current program, activate it now
+			// If this is the current program, activate it
 			if (program === this._currentProgram) {
 				this._sampleData = data.sampleData;
-
-				// Distribute sample data to all voice parts
 				for (let i = 0; i < this._numVoices; i++) {
-					// @ts-ignore
 					this._voices[i]._leftPart.setSampleData(
 						this._sampleData,
 						metadata
 					);
-					// @ts-ignore
 					this._voices[i]._rightPart.setSampleData(
 						this._sampleData,
 						metadata
@@ -493,43 +409,41 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			}
 
 			console.log(
-				'[Synth] SoundFont program',
+				'[Synth] Program',
 				program,
 				'loaded, sample length:',
-				data.sampleData?.length,
+				data.sampleData ? data.sampleData.length : 0,
 				'total programs:',
 				this._programMap.size
 			);
 		}
 
-		/** Put all voices into idle state */
+		/**
+		 * Reset all voices
+		 */
 		reset() {
 			this._voiceStates.fill(0);
-			let i = 0;
-			while (i < this._numVoices) {
+			for (let i = 0; i < this._numVoices; i++) {
 				this._voices[i].reset();
-				i++;
 			}
 		}
 
 		/**
-		 * Start a new voice on the channel and note
-		 * @param {number} channel MIDI channel number
-		 * @param {number} note MIDI note number
-		 * @param {number} velocity MIDI velocity number
+		 * Start a note
+		 * @param {number} channel
+		 * @param {number} note
+		 * @param {number} velocity
 		 */
 		noteOn(channel, note, velocity) {
-			console.log('[Synth] noteOn called:', { channel, note, velocity });
-
-			/* stop any matching voices */
+			// Stop any existing voices on this note
 			this.noteOff(channel, note, velocity);
 
-			/* start an idle voice, stealing the eldest active one if necessary */
+			// Find an idle voice or steal the oldest one
 			let oldestTimestamp = globalThis.currentTime;
 			let oldestIdx = 0;
 			let allocatedIdx = -1;
-			let i = 0;
-			while (i < this._numVoices) {
+
+			for (let i = 0; i < this._numVoices; i++) {
 				if (this._voiceStates[i] === 0) {
 					allocatedIdx = i;
 					break;
@@ -538,74 +452,61 @@ const getWamExampleTemplateSynth = (moduleId) => {
 					oldestTimestamp = this._voices[i].timestamp;
 					oldestIdx = i;
 				}
-				i++;
 			}
+
 			if (allocatedIdx === -1) {
-				/* no idle voices, steal the oldest one */
+				// No idle voices, steal the oldest
 				this.noteEnd(oldestIdx);
 				allocatedIdx = oldestIdx;
 			}
 
-			console.log('[Synth] Allocating voice:', allocatedIdx);
 			this._voiceStates[allocatedIdx] = 1;
 			this._voices[allocatedIdx].noteOn(channel, note, velocity);
 		}
 
 		/**
-		 * Stop active voices on the channel and note
-		 * @param {number} channel MIDI channel number
-		 * @param {number} note MIDI note number
-		 * @param {number} velocity MIDI velocity number
+		 * Stop a note
+		 * @param {number} channel
+		 * @param {number} note
+		 * @param {number} velocity
 		 */
 		noteOff(channel, note, velocity) {
-			/* stop all matching voices */
-			let i = 0;
-			while (i < this._numVoices) {
+			for (let i = 0; i < this._numVoices; i++) {
 				if (
 					this._voiceStates[i] === 1 &&
 					this._voices[i].matches(channel, note)
 				) {
 					this._voices[i].noteOff(channel, note, velocity);
 				}
-				i++;
 			}
 		}
 
 		/**
-		 * Terminate a voice
-		 * @param {number} voiceIdx the index of the ending voice
+		 * End a voice
+		 * @param {number} voiceIdx
 		 */
 		noteEnd(voiceIdx) {
-			/* update voice state */
 			this._voiceStates[voiceIdx] = 0;
 			this._voices[voiceIdx].reset();
 		}
 
 		/**
-		 * Add output from all active voices to the output buffers
-		 * @param {number} startSample beginning of processing slice
-		 * @param {number} endSample end of processing slice
+		 * Process audio
+		 * @param {number} startSample
+		 * @param {number} endSample
 		 * @param {Float32Array[]} inputs
 		 * @param {Float32Array[]} outputs
 		 */
 		process(startSample, endSample, inputs, outputs) {
-			const activeVoices = this._voiceStates.reduce(
-				(sum, state) => sum + state,
-				0
-			);
-
-			// clear/initialize output buffers
-			for (let c = 0; c < this._numChannels; ++c) {
-				let n = startSample;
-				while (n < endSample) {
+			// Clear output buffers
+			for (let c = 0; c < this._numChannels; c++) {
+				for (let n = startSample; n < endSample; n++) {
 					outputs[c][n] = 0;
-					n++;
 				}
 			}
 
-			// render active voices
-			let i = 0;
-			while (i < this._numVoices) {
+			// Render all active voices
+			for (let i = 0; i < this._numVoices; i++) {
 				if (this._voiceStates[i] === 1) {
 					const stillActive = this._voices[i].process(
 						startSample,
@@ -613,22 +514,22 @@ const getWamExampleTemplateSynth = (moduleId) => {
 						inputs,
 						outputs
 					);
-					if (!stillActive) this.noteEnd(i);
+					if (!stillActive) {
+						this.noteEnd(i);
+					}
 				}
-				i++;
 			}
 		}
 
 		static generateWamParameterInfo() {
-			return {
-				// SoundFont synth parameters
-			};
+			return {};
 		}
 	}
 
 	if (audioWorkletGlobalScope.AudioWorkletProcessor) {
-		if (!ModuleScope.WamExampleTemplateSynth)
+		if (!ModuleScope.WamExampleTemplateSynth) {
 			ModuleScope.WamExampleTemplateSynth = WamExampleTemplateSynth;
+		}
 	}
 
 	return WamExampleTemplateSynth;
