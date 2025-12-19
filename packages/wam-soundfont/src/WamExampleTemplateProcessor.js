@@ -71,26 +71,18 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			/** @private Store soundfont data until synth is created */
 			this._pendingSoundFontData = null;
 
-			/** @private Counter for throttling logs */
-			this._processCallCount = 0;
-
 			// Set up message handler immediately in constructor
 			const originalOnMessage = this.port.onmessage;
 			this.port.onmessage = (event) => {
-				console.log('[Processor] Port message received:', event.data);
 				if (event.data.type === 'loadSoundFont') {
 					console.log(
 						'[Processor] Received SoundFont data, sample length:',
 						event.data.data.sampleData?.length
 					);
 					if (this._synth) {
-						console.log('[Processor] Loading SoundFont into synth');
 						// @ts-ignore
 						this._synth.loadSoundFontData(event.data.data);
 					} else {
-						console.log(
-							'[Processor] Synth not yet created, storing data for later'
-						);
 						this._pendingSoundFontData = event.data.data;
 					}
 				} else if (originalOnMessage) {
@@ -148,82 +140,26 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 		}
 
 		/**
-		 *
+		 * Optimized MIDI handler - only processes note on/off
 		 * @param {WamMidiData} midiData
 		 */
 		_onMidi(midiData) {
-			/* eslint-disable no-lone-blocks */
 			const bytes = midiData.bytes;
 			let type = bytes[0] & 0xf0;
 			const channel = bytes[0] & 0x0f;
 			const data1 = bytes[1];
 			const data2 = bytes[2];
+
+			// Convert note-on with velocity 0 to note-off
 			if (type === 0x90 && data2 === 0) type = 0x80;
 
-			console.log('[Processor] MIDI received:', {
-				type: type.toString(16),
-				channel,
-				data1,
-				data2,
-			});
-
-			// handle midi as needed here
-			switch (type) {
-				case 0x80:
-					{
-						/* note off */
-						console.log('[Processor] Note OFF:', data1);
-						this._synth.noteOff(channel, data1, data2);
-					}
-					break;
-				case 0x90:
-					{
-						/* note on */
-						console.log(
-							'[Processor] Note ON:',
-							data1,
-							'velocity:',
-							data2
-						);
-						this._synth.noteOn(channel, data1, data2);
-					}
-					break;
-				case 0xa0:
-					{
-						/* aftertouch */
-					}
-					break;
-				case 0xb0:
-					{
-						/* continuous controller */
-					}
-					break;
-				case 0xc0:
-					{
-						/* patch change */
-					}
-					break;
-				case 0xd0:
-					{
-						/* channel pressure */
-					}
-					break;
-				case 0xe0:
-					{
-						/* pitch bend */
-					}
-					break;
-				case 0xf0:
-					{
-						/* system */
-					}
-					break;
-				default:
-					{
-						/* invalid */
-					}
-					break;
+			// Only handle note on/off for performance
+			if (type === 0x80) {
+				this._synth.noteOff(channel, data1, data2);
+			} else if (type === 0x90) {
+				this._synth.noteOn(channel, data1, data2);
 			}
+			// Ignore other MIDI messages (CC, pitch bend, etc.) for offline rendering performance
 		}
 
 		/**
@@ -237,25 +173,6 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			const input = inputs[0];
 			const output = outputs[0];
 
-			// Log every 1000th call to avoid flooding console
-			this._processCallCount++;
-			if (this._processCallCount % 1000 === 0) {
-				console.log(
-					'[Processor] _process called (count:',
-					this._processCallCount,
-					')'
-				);
-			}
-
-			if (!this._synth) {
-				if (this._processCallCount === 1) {
-					console.error(
-						'[Processor] _synth is null on first process call!'
-					);
-				}
-				return;
-			}
-
 			this._synth.process(startSample, endSample, input, output);
 
 			// Check if we have any non-zero output
@@ -268,13 +185,6 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 					}
 				}
 				if (hasOutput) break;
-			}
-
-			if (hasOutput && this._processCallCount % 100 === 0) {
-				console.log(
-					'[Processor] Output detected! output[0][0]:',
-					output[0][0]
-				);
 			}
 		}
 	}

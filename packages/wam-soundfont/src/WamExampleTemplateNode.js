@@ -72,7 +72,7 @@ export default class WamExampleTemplateNode extends WamNode {
 	async _initialize() {
 		// Call parent initialization first (sends initialize/processor message)
 		await super._initialize();
-		
+
 		// Then load soundfont
 		await this._loadSoundFont(
 			'https://static.fourtrack.fm/GeneralUser-GS.sf2',
@@ -102,15 +102,18 @@ export default class WamExampleTemplateNode extends WamNode {
 				sf2Data.sampleData?.length
 			);
 
-			// Send parsed data to processor
-			this.port.postMessage({
+			// Send parsed data to processor using transferable objects for zero-copy
+			const message = {
 				type: 'loadSoundFont',
 				data: {
 					sampleData: sf2Data.sampleData,
+					selectedSample: sf2Data.selectedSample,
 					sampleRate: sf2Data.sampleRate,
 					program: sf2Data.program,
 				},
-			});
+			};
+			// Transfer the ArrayBuffer to avoid copying
+			this.port.postMessage(message, [sf2Data.sampleData.buffer]);
 
 			this._soundfontLoaded = true;
 			console.log('[Node] SoundFont data sent to processor');
