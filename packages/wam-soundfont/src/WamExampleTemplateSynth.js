@@ -70,6 +70,15 @@ const getWamExampleTemplateSynth = (moduleId) => {
 
 			/** @private @type {number} playback speed ratio */
 			this._playbackRate = 1.0;
+
+			/** @private @type {number} root key from sample metadata */
+			this._rootKey = 60; // Default middle C
+
+			/** @private @type {number} sample loop start */
+			this._loopStart = 0;
+
+			/** @private @type {number} sample loop end */
+			this._loopEnd = 0;
 		}
 
 		/**
@@ -85,9 +94,20 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		/**
 		 * Set sample data for playback
 		 * @param {Int16Array} sampleData
+		 * @param {Object} metadata - Sample metadata with rootKey and loop points
 		 */
-		setSampleData(sampleData) {
+		setSampleData(sampleData, metadata = {}) {
 			this._sampleData = sampleData;
+			this._rootKey = metadata.rootKey || 60;
+			this._loopStart = metadata.loopStart || 0;
+			this._loopEnd =
+				metadata.loopEnd || (sampleData ? sampleData.length : 0);
+			console.log('[Part] Sample metadata:', {
+				rootKey: this._rootKey,
+				loopStart: this._loopStart,
+				loopEnd: this._loopEnd,
+				sampleLength: sampleData ? sampleData.length : 0,
+			});
 		}
 
 		/**
@@ -96,23 +116,15 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 * @param {number} frequency - frequency in Hz
 		 */
 		start(gain, frequency) {
-			console.log('[Part] start called:', {
-				gain,
-				frequency,
-				hasSampleData: !!this._sampleData,
-			});
 			this._active = true;
 			this._gain = gain * 0.3;
 			this._phase = 0.0;
 			this._phaseIncrement = (frequency * 2 * Math.PI) / this._sampleRate;
 			this._samplePosition = 0;
-			// Calculate playback rate for pitch shifting
-			// Assuming sample is at middle C (261.63 Hz)
-			this._playbackRate = frequency / 261.63;
-			console.log('[Part] Configured:', {
-				gain: this._gain,
-				playbackRate: this._playbackRate,
-			});
+			// Calculate playback rate based on root key
+			// Convert MIDI note to frequency: f = 440 * 2^((n-69)/12)
+			const rootFreq = 440.0 * Math.pow(2.0, (this._rootKey - 69) / 12.0);
+			this._playbackRate = frequency / rootFreq;
 		}
 
 		/**
@@ -138,16 +150,38 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			let n = startSample;
 			while (n < endSample) {
 				if (this._sampleData && this._sampleData.length > 0) {
-					// Play back sample data with pitch shifting
+					// Play back sample data with pitch shifting and looping
 					const sampleIndex = Math.floor(this._samplePosition);
-					if (sampleIndex < this._sampleData.length) {
+
+					// Check if we've reached the end
+					if (sampleIndex >= this._sampleData.length) {
+						// If loop points are valid, loop back
+						if (
+							this._loopEnd > this._loopStart &&
+							this._loopStart >= 0
+						) {
+							const loopLength = this._loopEnd - this._loopStart;
+							this._samplePosition =
+								this._loopStart +
+								((sampleIndex - this._loopEnd) % loopLength);
+						} else {
+							// No loop, end playback
+							this._active = false;
+							break;
+						}
+					}
+
+					const finalIndex = Math.floor(this._samplePosition);
+					if (
+						finalIndex >= 0 &&
+						finalIndex < this._sampleData.length
+					) {
 						// Convert Int16 to float (-1 to 1)
 						const sampleValue =
-							this._sampleData[sampleIndex] / 32768.0;
+							this._sampleData[finalIndex] / 32768.0;
 						signal[n] += this._gain * sampleValue;
 						this._samplePosition += this._playbackRate;
 					} else {
-						// Sample ended
 						this._active = false;
 						break;
 					}
@@ -399,12 +433,31 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			console.log('[Synth] Loading SoundFont data', data);
 			this._sampleData = data.sampleData;
 
+			// Extract metadata from selected sample
+			const metadata = {};
+			if (data.selectedSample) {
+				metadata.rootKey =
+					data.selectedSample.rootKey ||
+					data.selectedSample.originalPitch ||
+					60;
+				metadata.loopStart = data.selectedSample.loopStart || 0;
+				metadata.loopEnd =
+					data.selectedSample.loopEnd || this._sampleData.length;
+				console.log('[Synth] Sample metadata:', metadata);
+			}
+
 			// Distribute sample data to all voice parts
 			for (let i = 0; i < this._numVoices; i++) {
 				// @ts-ignore
-				this._voices[i]._leftPart.setSampleData(this._sampleData);
+				this._voices[i]._leftPart.setSampleData(
+					this._sampleData,
+					metadata
+				);
 				// @ts-ignore
-				this._voices[i]._rightPart.setSampleData(this._sampleData);
+				this._voices[i]._rightPart.setSampleData(
+					this._sampleData,
+					metadata
+				);
 			}
 
 			console.log(
