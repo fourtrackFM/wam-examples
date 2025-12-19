@@ -431,6 +431,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			this._rootKey = 60;
 			this._loopStart = 0;
 			this._loopEnd = 0;
+			this._sampleDataSampleRate = 44100; // SF2 sample's native sample rate
 		}
 
 		reset() {
@@ -442,7 +443,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		/**
 		 * Set sample data for playback
 		 * @param {Int16Array} sampleData
-		 * @param {Object} metadata - Sample metadata with rootKey and loop points
+		 * @param {Object} metadata - Sample metadata with rootKey, loop points, and sampleRate
 		 */
 		setSampleData(sampleData, metadata) {
 			this._sampleData = sampleData;
@@ -450,6 +451,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			this._loopStart = metadata.loopStart || 0;
 			this._loopEnd =
 				metadata.loopEnd || (sampleData ? sampleData.length : 0);
+			this._sampleDataSampleRate = metadata.sampleRate || 44100;
 		}
 
 		/**
@@ -464,7 +466,10 @@ const getWamExampleTemplateSynth = (moduleId) => {
 
 			// Calculate playback rate based on root key
 			const rootFreq = 440.0 * Math.pow(2.0, (this._rootKey - 69) / 12.0);
-			this._playbackRate = frequency / rootFreq;
+			// Account for both pitch difference AND sample rate difference
+			const sampleRateRatio =
+				this._sampleDataSampleRate / this._sampleRate;
+			this._playbackRate = (frequency / rootFreq) * sampleRateRatio;
 		}
 
 		/**
