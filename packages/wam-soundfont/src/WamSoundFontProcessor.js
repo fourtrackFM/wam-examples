@@ -72,6 +72,11 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			this._sf2Buffer = options.processorOptions
 				? options.processorOptions.sf2Buffer
 				: null;
+
+			/** @private @type {number} */
+			this._currentProgram = 0;
+
+			this.params = this._generateWamParameterInfo();
 		}
 
 		/**
@@ -126,6 +131,35 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 		}
 
 		/**
+		 * Override to handle parameter changes, particularly program changes
+		 * @param {import('../../api/src').WamParameterData} parameterUpdate
+		 * @param {boolean} interpolate
+		 */
+		_setParameterValue(parameterUpdate, interpolate) {
+			// Call parent implementation first
+			super._setParameterValue(parameterUpdate, interpolate);
+
+			// Handle program changes
+			if (parameterUpdate.id === 'program') {
+				const newProgram = Math.round(
+					parameterUpdate.normalized
+						? parameterUpdate.value * 127
+						: parameterUpdate.value
+				);
+
+				// Only change if different and synth is initialized
+				if (this._synth && newProgram !== this._currentProgram) {
+					this._currentProgram = newProgram;
+					this._synth.programChange(newProgram);
+					console.log(
+						'[Processor] Program changed via automation to:',
+						newProgram
+					);
+				}
+			}
+		}
+
+		/**
 		 * Optimized MIDI handler - handles note on/off and program change
 		 * @param {WamMidiData} midiData
 		 */
@@ -150,10 +184,10 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 				if (newProgram !== this._currentProgram) {
 					this._currentProgram = newProgram;
 					// Request the Node to load this program
-					this.port.postMessage({
-						type: 'requestProgramLoad',
-						program: newProgram,
-					});
+					// this.port.postMessage({
+					// 	type: 'requestProgramLoad',
+					// 	program: newProgram,
+					// });
 				}
 				this._synth.programChange(newProgram);
 			}
