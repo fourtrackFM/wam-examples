@@ -71,6 +71,9 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			/** @private Store soundfont data until synth is created */
 			this._pendingSoundFontData = null;
 
+			/** @private Track current program number */
+			this._currentProgram = 0;
+
 			// Set up message handler immediately in constructor
 			const originalOnMessage = this.port.onmessage;
 			this.port.onmessage = (event) => {
@@ -107,7 +110,13 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 					label: 'Bypass',
 					defaultValue: false,
 				}),
-				...WamExampleTemplateSynth.generateWamParameterInfo(),
+				program: new WamParameterInfo('program', {
+					type: 'int',
+					label: 'Program',
+					defaultValue: 0,
+					minValue: 0,
+					maxValue: 127,
+				}),
 			};
 		}
 
@@ -140,7 +149,7 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 		}
 
 		/**
-		 * Optimized MIDI handler - only processes note on/off
+		 * Optimized MIDI handler - handles note on/off and program change
 		 * @param {WamMidiData} midiData
 		 */
 		_onMidi(midiData) {
@@ -153,11 +162,14 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			// Convert note-on with velocity 0 to note-off
 			if (type === 0x90 && data2 === 0) type = 0x80;
 
-			// Only handle note on/off for performance
+			// Handle note on/off
 			if (type === 0x80) {
 				this._synth.noteOff(channel, data1, data2);
 			} else if (type === 0x90) {
 				this._synth.noteOn(channel, data1, data2);
+			} else if (type === 0xc0) {
+				// MIDI program change
+				this._synth.programChange(data1);
 			}
 			// Ignore other MIDI messages (CC, pitch bend, etc.) for offline rendering performance
 		}

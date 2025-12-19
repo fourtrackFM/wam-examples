@@ -26,6 +26,7 @@ export interface WamExampleTemplateSynth {
     reset(): void;
     noteOn(channel: number, note: number, velocity: number): void;
     noteOff(channel: number, note: number, velocity: number): void;
+    programChange(program: number): void;
     noteEnd(voiceIdx: number): void;
     process(startSample: number, endSample: number, inputs: Float32Array[], outputs: Float32Array[]): void;
 }

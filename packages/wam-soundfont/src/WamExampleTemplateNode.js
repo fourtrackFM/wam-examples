@@ -64,6 +64,12 @@ export default class WamExampleTemplateNode extends WamNode {
 
 		/** @private @type {boolean} */
 		this._soundfontLoaded = false;
+
+		/** @private @type {string} */
+		this._soundfontUrl = 'https://static.fourtrack.fm/GeneralUser-GS.sf2';
+
+		/** @private @type {number} */
+		this._currentProgram = 0;
 	}
 
 	/**
@@ -73,19 +79,17 @@ export default class WamExampleTemplateNode extends WamNode {
 		// Call parent initialization first (sends initialize/processor message)
 		await super._initialize();
 
-		// Then load soundfont
-		await this._loadSoundFont(
-			'https://static.fourtrack.fm/GeneralUser-GS.sf2',
-			0
-		);
+		// Load soundfont with multiple programs
+		this._soundfontUrl = 'https://static.fourtrack.fm/GeneralUser-GS.sf2';
+		this._currentProgram = 0;
+		await this._loadSoundFont(this._soundfontUrl);
 	}
 
 	/**
-	 * Load SoundFont file and send samples to processor
+	 * Load SoundFont file and send samples for all programs to processor
 	 * @param {string} url - URL to SF2 file
-	 * @param {number} program - Program number to load
 	 */
-	async _loadSoundFont(url, program) {
+	async _loadSoundFont(url) {
 		try {
 			console.log('[Node] Loading SoundFont from', url);
 			const response = await fetch(url);
@@ -95,28 +99,39 @@ export default class WamExampleTemplateNode extends WamNode {
 				arrayBuffer.byteLength
 			);
 
-			// Parse the SF2 file
-			const sf2Data = parseSF2(arrayBuffer, program);
-			console.log(
-				'[Node] SF2 parsed, sample data length:',
-				sf2Data.sampleData?.length
-			);
+			// Load first 10 programs (0-9) to start
+			// TODO: Load on demand or parse all presets
+			for (let program = 0; program < 10; program++) {
+				// Parse the SF2 file for this program
+				const sf2Data = parseSF2(arrayBuffer, program);
+				if (!sf2Data || !sf2Data.sampleData) {
+					console.warn('[Node] No data for program', program);
+					continue;
+				}
 
-			// Send parsed data to processor using transferable objects for zero-copy
-			const message = {
-				type: 'loadSoundFont',
-				data: {
-					sampleData: sf2Data.sampleData,
-					selectedSample: sf2Data.selectedSample,
-					sampleRate: sf2Data.sampleRate,
-					program: sf2Data.program,
-				},
-			};
-			// Transfer the ArrayBuffer to avoid copying
-			this.port.postMessage(message, [sf2Data.sampleData.buffer]);
+				console.log(
+					'[Node] Program',
+					program,
+					'parsed, sample data length:',
+					sf2Data.sampleData?.length
+				);
+
+				// Send parsed data to processor using transferable objects for zero-copy
+				const message = {
+					type: 'loadSoundFont',
+					data: {
+						sampleData: sf2Data.sampleData,
+						selectedSample: sf2Data.selectedSample,
+						sampleRate: sf2Data.sampleRate,
+						program: sf2Data.program,
+					},
+				};
+				// Transfer the ArrayBuffer to avoid copying
+				this.port.postMessage(message, [sf2Data.sampleData.buffer]);
+			}
 
 			this._soundfontLoaded = true;
-			console.log('[Node] SoundFont data sent to processor');
+			console.log('[Node] SoundFont programs sent to processor');
 		} catch (error) {
 			console.error('[Node] Error loading SoundFont:', error);
 		}
