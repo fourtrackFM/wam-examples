@@ -400,52 +400,57 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				i++;
 			}
 
-		/** @private @type {ArrayBuffer} full soundfont file buffer */
-		this._sf2Buffer = null;
+			/** @private @type {ArrayBuffer} full soundfont file buffer */
+			this._sf2Buffer = null;
 
-		/** @private @type {Map<number, Object>} map of program number to sample data */
-		this._programMap = new Map();
+			/** @private @type {Map<number, Object>} map of program number to sample data */
+			this._programMap = new Map();
 
-		/** @private @type {number} current program number */
-		this._currentProgram = 0;
-	}
-
-	/**
-	 * Handle MIDI program change
-	 * @param {number} program - MIDI program number (0-127)
-	 */
-	programChange(program) {
-		if (program === this._currentProgram) {
-			console.log('[Synth] Program change to same program, no action taken');
-			return; // No change
+			/** @private @type {number} current program number */
+			this._currentProgram = 0;
 		}
 
-		this._currentProgram = program;
-		// Load the sample data for this program
-		const programData = this._programMap.get(program);
-		this._sampleData = programData.sampleData;
+		/**
+		 * Handle MIDI program change
+		 * @param {number} program - MIDI program number (0-127)
+		 */
+		programChange(program) {
+			if (program === this._currentProgram) {
+				console.log(
+					'[Synth] Program change to same program, no action taken'
+				);
+				return; // No change
+			}
 
-		// Update all voices with the new sample data
-		const metadata = programData.metadata;
-		for (let i = 0; i < this._numVoices; i++) {
-			// @ts-ignore
-			this._voices[i]._leftPart.setSampleData(
-				this._sampleData,
-				metadata
-			);
-			// @ts-ignore
-			this._voices[i]._rightPart.setSampleData(
-				this._sampleData,
-				metadata
+			this._currentProgram = program;
+			// Load the sample data for this program
+			const programData = this._programMap.get(program);
+			this._sampleData = programData.sampleData;
+
+			// Update all voices with the new sample data
+			const metadata = programData.metadata;
+			for (let i = 0; i < this._numVoices; i++) {
+				// @ts-ignore
+				this._voices[i]._leftPart.setSampleData(
+					this._sampleData,
+					metadata
+				);
+				// @ts-ignore
+				this._voices[i]._rightPart.setSampleData(
+					this._sampleData,
+					metadata
+				);
+			}
+
+			console.log(
+				'[Synth] Switched to program',
+				program,
+				', sample length:',
+				this._sampleData?.length
 			);
 		}
 
-		console.log('[Synth] Switched to program', program, ', sample length:', this._sampleData?.length);
-	}
-
-
-
-	loadSoundFontData(data) {
+		loadSoundFontData(data) {
 			console.log('[Synth] Loading SoundFont data', data);
 
 			// Extract metadata from selected sample
@@ -488,9 +493,12 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			}
 
 			console.log(
-				'[Synth] SoundFont program', program, 'loaded, sample length:',
+				'[Synth] SoundFont program',
+				program,
+				'loaded, sample length:',
 				data.sampleData?.length,
-				'total programs:', this._programMap.size
+				'total programs:',
+				this._programMap.size
 			);
 		}
 
@@ -609,6 +617,12 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				}
 				i++;
 			}
+		}
+
+		static generateWamParameterInfo() {
+			return {
+				// SoundFont synth parameters
+			};
 		}
 	}
 

@@ -7,8 +7,8 @@
 import addFunctionModule from '../../sdk/src/addFunctionModule.js';
 import WamNode from '../../sdk/src/WamNode.js';
 
-import getWamExampleTemplateSynth from './WamExampleTemplateSynth.js';
-import getWamExampleTemplateProcessor from './WamExampleTemplateProcessor.js';
+import getWamExampleTemplateSynth from './WamSoundFontSynth.js';
+import getWamExampleTemplateProcessor from './WamSoundFontProcessor.js';
 import { parseSF2 } from './sf2-parser.js';
 
 /* eslint-disable no-empty-function */

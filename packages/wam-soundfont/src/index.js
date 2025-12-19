@@ -3,7 +3,7 @@
 // SDK
 import WebAudioModule from '../../sdk/src/WebAudioModule.js';
 // DSP
-import WamExampleTemplateNode from './WamExampleTemplateNode.js';
+import WamExampleTemplateNode from './WamSoundFontNode.js';
 // GUI
 import { createElement } from './Gui/index.js';
 
