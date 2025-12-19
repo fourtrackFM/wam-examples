@@ -366,6 +366,10 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		const sample = hydra.sampleHeaders[sampleId];
 		const sampleData = rawSampleData.slice(sample.start, sample.end);
 
+		// Convert absolute loop points to relative positions within the sliced data
+		const relativeLoopStart = sample.loopStart - sample.start;
+		const relativeLoopEnd = sample.loopEnd - sample.start;
+
 		return {
 			sampleData,
 			selectedSample: {
@@ -373,6 +377,9 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				rootKey: overrideRootKey || sample.originalPitch,
 				keyRange,
 				velRange,
+				// Use relative loop points
+				loopStart: relativeLoopStart,
+				loopEnd: relativeLoopEnd,
 			},
 			sampleRate: sample.sampleRate,
 			program: programNumber,
@@ -486,31 +493,30 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			}
 
 			for (let n = startSample; n < endSample; n++) {
-				const sampleIndex = Math.floor(this._samplePosition);
+				let sampleIndex = Math.floor(this._samplePosition);
 
-				// Handle looping
-				if (sampleIndex >= this._loopEnd) {
-					if (
-						this._loopEnd > this._loopStart &&
-						this._loopStart >= 0
-					) {
-						const loopLength = this._loopEnd - this._loopStart;
-						this._samplePosition =
-							this._loopStart +
-							((sampleIndex - this._loopEnd) % loopLength);
-					} else {
-						this._active = false;
-						return false;
-					}
+				// Handle looping: when we reach loopEnd, jump back to loopStart
+				if (
+					sampleIndex >= this._loopEnd &&
+					this._loopEnd > this._loopStart &&
+					this._loopStart >= 0
+				) {
+					// Jump back to loop start and continue from there
+					const loopLength = this._loopEnd - this._loopStart;
+					const overshoot = this._samplePosition - this._loopEnd;
+					this._samplePosition =
+						this._loopStart + (overshoot % loopLength);
+					sampleIndex = Math.floor(this._samplePosition);
 				}
 
-				const finalIndex = Math.floor(this._samplePosition);
-				if (finalIndex >= 0 && finalIndex < this._sampleData.length) {
+				// Check bounds and play sample
+				if (sampleIndex >= 0 && sampleIndex < this._sampleData.length) {
 					// Convert Int16 to float32 (-1 to 1)
-					const sampleValue = this._sampleData[finalIndex] / 32768.0;
+					const sampleValue = this._sampleData[sampleIndex] / 32768.0;
 					signal[n] += this._gain * sampleValue;
 					this._samplePosition += this._playbackRate;
 				} else {
+					// If no valid loop, stop when we reach the end
 					this._active = false;
 					return false;
 				}
@@ -722,13 +728,11 @@ const getWamExampleTemplateSynth = (moduleId) => {
 						const voice = this._voices[i];
 						voice._leftPart.setSampleData(
 							this._sampleData,
-							metadata.selectedSample,
-							metadata.sampleRate
+							metadata.selectedSample
 						);
 						voice._rightPart.setSampleData(
 							this._sampleData,
-							metadata.selectedSample,
-							metadata.sampleRate
+							metadata.selectedSample
 						);
 					}
 					console.log(
@@ -763,11 +767,11 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			for (let i = 0; i < this._numVoices; i++) {
 				this._voices[i]._leftPart.setSampleData(
 					this._sampleData,
-					metadata
+					metadata.selectedSample
 				);
 				this._voices[i]._rightPart.setSampleData(
 					this._sampleData,
-					metadata
+					metadata.selectedSample
 				);
 			}
 
@@ -775,7 +779,11 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				'[Synth] Switched to program',
 				program,
 				'sample length:',
-				this._sampleData ? this._sampleData.length : 0
+				this._sampleData ? this._sampleData.length : 0,
+				'loop:',
+				metadata.selectedSample?.loopStart || 0,
+				'-',
+				metadata.selectedSample?.loopEnd || 0
 			);
 		}
 
@@ -812,11 +820,11 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				for (let i = 0; i < this._numVoices; i++) {
 					this._voices[i]._leftPart.setSampleData(
 						this._sampleData,
-						metadata
+						data.selectedSample || metadata
 					);
 					this._voices[i]._rightPart.setSampleData(
 						this._sampleData,
-						metadata
+						data.selectedSample || metadata
 					);
 				}
 			}

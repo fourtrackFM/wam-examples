@@ -52,7 +52,7 @@ async function downloadSF2() {
 }
 
 /**
- * Test a single program
+ * Test a single program and extract loop information
  */
 function testProgram(arrayBuffer, programNumber) {
 	try {
@@ -104,6 +104,13 @@ function testProgram(arrayBuffer, programNumber) {
 			sampleLength: result.sampleData.length,
 			sampleRate: result.sampleRate,
 			rootKey: result.selectedSample.rootKey,
+			loopStart: result.selectedSample.loopStart,
+			loopEnd: result.selectedSample.loopEnd,
+			sampleStart: result.selectedSample.start,
+			sampleEnd: result.selectedSample.end,
+			loopEnabled:
+				result.selectedSample.loopStart !==
+				result.selectedSample.loopEnd,
 		};
 	} catch (error) {
 		console.error(`  ❌ Program ${programNumber}: ${error.message}`);
@@ -147,6 +154,13 @@ async function runTests() {
 		console.log(`\nTotal programs tested: ${results.length}`);
 		console.log(`✅ Successful: ${successful.length}`);
 		console.log(`❌ Failed: ${failed.length}`);
+
+		// Loop statistics
+		const withLoops = successful.filter((r) => r.loopEnabled);
+		const withoutLoops = successful.filter((r) => !r.loopEnabled);
+		console.log(`\nLoop Information:`);
+		console.log(`  Programs with loops: ${withLoops.length}`);
+		console.log(`  Programs without loops: ${withoutLoops.length}`);
 
 		if (failed.length > 0) {
 			console.log('\nFailed programs:');

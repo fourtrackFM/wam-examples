@@ -1,5 +1,5 @@
 {
-  "timestamp": "2025-12-19T16:51:00.165Z",
+  "timestamp": "2025-12-19T17:11:44.840Z",
   "sf2Url": "https://static.fourtrack.fm/GeneralUser-GS.sf2",
   "totalTested": 128,
   "successful": 128,
@@ -12,7 +12,12 @@
       "instrumentName": "Stereo Grand Mellow",
       "sampleLength": 70787,
       "sampleRate": 31000,
-      "rootKey": 26
+      "rootKey": 26,
+      "loopStart": 6957589,
+      "loopEnd": 6992735,
+      "sampleStart": 6921949,
+      "sampleEnd": 6992736,
+      "loopEnabled": true
     },
     {
       "program": 1,
@@ -21,7 +26,12 @@
       "instrumentName": "Stereo Grand Bright",
       "sampleLength": 70787,
       "sampleRate": 31000,
-      "rootKey": 26
+      "rootKey": 26,
+      "loopStart": 6957589,
+      "loopEnd": 6992735,
+      "sampleStart": 6921949,
+      "sampleEnd": 6992736,
+      "loopEnabled": true
     },
     {
       "program": 2,
@@ -30,7 +40,12 @@
       "instrumentName": "CP-80 EP",
       "sampleLength": 10297,
       "sampleRate": 11025,
-      "rootKey": 36
+      "rootKey": 36,
+      "loopStart": 9223085,
+      "loopEnd": 9223253,
+      "sampleStart": 9213009,
+      "sampleEnd": 9223306,
+      "loopEnabled": true
     },
     {
       "program": 3,
@@ -39,7 +54,12 @@
       "instrumentName": "Stereo Grand",
       "sampleLength": 70787,
       "sampleRate": 31000,
-      "rootKey": 26
+      "rootKey": 26,
+      "loopStart": 6957589,
+      "loopEnd": 6992735,
+      "sampleStart": 6921949,
+      "sampleEnd": 6992736,
+      "loopEnabled": true
     },
     {
       "program": 4,
@@ -48,7 +68,12 @@
       "instrumentName": "Rhodes P",
       "sampleLength": 10255,
       "sampleRate": 44100,
-      "rootKey": 38
+      "rootKey": 38,
+      "loopStart": 5905658,
+      "loopEnd": 5906260,
+      "sampleStart": 5896005,
+      "sampleEnd": 5906260,
+      "loopEnabled": true
     },
     {
       "program": 5,
@@ -57,7 +82,12 @@
       "instrumentName": "DX7_2",
       "sampleLength": 28675,
       "sampleRate": 44100,
-      "rootKey": 38
+      "rootKey": 38,
+      "loopStart": 5716796,
+      "loopEnd": 5717546,
+      "sampleStart": 5688936,
+      "sampleEnd": 5717611,
+      "loopEnabled": true
     },
     {
       "program": 6,
@@ -66,7 +96,12 @@
       "instrumentName": "Harpsichord_1",
       "sampleLength": 20717,
       "sampleRate": 44101,
-      "rootKey": 37
+      "rootKey": 37,
+      "loopStart": 368775,
+      "loopEnd": 369406,
+      "sampleStart": 348783,
+      "sampleEnd": 369500,
+      "loopEnabled": true
     },
     {
       "program": 7,
@@ -75,7 +110,12 @@
       "instrumentName": "Clavinet_1",
       "sampleLength": 22923,
       "sampleRate": 32000,
-      "rootKey": 35
+      "rootKey": 35,
+      "loopStart": 9495040,
+      "loopEnd": 9495556,
+      "sampleStart": 9472641,
+      "sampleEnd": 9495564,
+      "loopEnabled": true
     },
     {
       "program": 8,
@@ -84,7 +124,12 @@
       "instrumentName": "Celeste",
       "sampleLength": 8115,
       "sampleRate": 33000,
-      "rootKey": 63
+      "rootKey": 63,
+      "loopStart": 1646804,
+      "loopEnd": 1647017,
+      "sampleStart": 1638910,
+      "sampleEnd": 1647025,
+      "loopEnabled": true
     },
     {
       "program": 9,
@@ -93,7 +138,12 @@
       "instrumentName": "Glockenspiel",
       "sampleLength": 39802,
       "sampleRate": 31250,
-      "rootKey": 80
+      "rootKey": 80,
+      "loopStart": 3411501,
+      "loopEnd": 3420859,
+      "sampleStart": 3381062,
+      "sampleEnd": 3420864,
+      "loopEnabled": true
     },
     {
       "program": 10,
@@ -102,7 +152,12 @@
       "instrumentName": "Music Box",
       "sampleLength": 8115,
       "sampleRate": 33000,
-      "rootKey": 63
+      "rootKey": 63,
+      "loopStart": 1646804,
+      "loopEnd": 1647017,
+      "sampleStart": 1638910,
+      "sampleEnd": 1647025,
+      "loopEnabled": true
     },
     {
       "program": 11,
@@ -111,7 +166,12 @@
       "instrumentName": "Vibraphone",
       "sampleLength": 13743,
       "sampleRate": 30000,
-      "rootKey": 46
+      "rootKey": 46,
+      "loopStart": 14922245,
+      "loopEnd": 14924273,
+      "sampleStart": 14910562,
+      "sampleEnd": 14924305,
+      "loopEnabled": true
     },
     {
       "program": 12,
@@ -120,7 +180,12 @@
       "instrumentName": "Marimba",
       "sampleLength": 17464,
       "sampleRate": 22050,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7377277,
+      "loopEnd": 7377447,
+      "sampleStart": 7360047,
+      "sampleEnd": 7377511,
+      "loopEnabled": true
     },
     {
       "program": 13,
@@ -129,7 +194,12 @@
       "instrumentName": "Xylophone",
       "sampleLength": 9795,
       "sampleRate": 20000,
-      "rootKey": 76
+      "rootKey": 76,
+      "loopStart": 9346763,
+      "loopEnd": 9356558,
+      "sampleStart": 9346763,
+      "sampleEnd": 9356558,
+      "loopEnabled": true
     },
     {
       "program": 14,
@@ -138,7 +208,12 @@
       "instrumentName": "Tubular Bells",
       "sampleLength": 70387,
       "sampleRate": 44100,
-      "rootKey": 72
+      "rootKey": 72,
+      "loopStart": 14272154,
+      "loopEnd": 14295142,
+      "sampleStart": 14224763,
+      "sampleEnd": 14295150,
+      "loopEnabled": true
     },
     {
       "program": 15,
@@ -147,7 +222,12 @@
       "instrumentName": "Dulcimer",
       "sampleLength": 45251,
       "sampleRate": 44100,
-      "rootKey": 67
+      "rootKey": 67,
+      "loopStart": 14007227,
+      "loopEnd": 14007339,
+      "sampleStart": 13962096,
+      "sampleEnd": 14007347,
+      "loopEnabled": true
     },
     {
       "program": 16,
@@ -156,7 +236,12 @@
       "instrumentName": "Hammond Organ",
       "sampleLength": 1548,
       "sampleRate": 22050,
-      "rootKey": 57
+      "rootKey": 57,
+      "loopStart": 11424131,
+      "loopEnd": 11424324,
+      "sampleStart": 11422978,
+      "sampleEnd": 11424526,
+      "loopEnabled": true
     },
     {
       "program": 17,
@@ -165,7 +250,12 @@
       "instrumentName": "Organ Slow Cycle",
       "sampleLength": 4977,
       "sampleRate": 44100,
-      "rootKey": 80
+      "rootKey": 80,
+      "loopStart": 10995313,
+      "loopEnd": 11000023,
+      "sampleStart": 10995054,
+      "sampleEnd": 11000031,
+      "loopEnabled": true
     },
     {
       "program": 18,
@@ -174,7 +264,12 @@
       "instrumentName": "Organ Fast Cycle",
       "sampleLength": 4671,
       "sampleRate": 44100,
-      "rootKey": 54
+      "rootKey": 54,
+      "loopStart": 10904566,
+      "loopEnd": 10908621,
+      "sampleStart": 10903958,
+      "sampleEnd": 10908629,
+      "loopEnabled": true
     },
     {
       "program": 19,
@@ -183,7 +278,12 @@
       "instrumentName": "Pipe Organ",
       "sampleLength": 59112,
       "sampleRate": 44100,
-      "rootKey": 48
+      "rootKey": 48,
+      "loopStart": 13156337,
+      "loopEnd": 13199995,
+      "sampleStart": 13140947,
+      "sampleEnd": 13200059,
+      "loopEnabled": true
     },
     {
       "program": 20,
@@ -192,7 +292,12 @@
       "instrumentName": "Reed Organ_1",
       "sampleLength": 10215,
       "sampleRate": 44100,
-      "rootKey": 58
+      "rootKey": 58,
+      "loopStart": 10165079,
+      "loopEnd": 10165266,
+      "sampleStart": 10155058,
+      "sampleEnd": 10165273,
+      "loopEnabled": true
     },
     {
       "program": 21,
@@ -201,7 +306,12 @@
       "instrumentName": "Accordion_1",
       "sampleLength": 10602,
       "sampleRate": 44100,
-      "rootKey": 54
+      "rootKey": 54,
+      "loopStart": 10068533,
+      "loopEnd": 10068768,
+      "sampleStart": 10058174,
+      "sampleEnd": 10068776,
+      "loopEnabled": true
     },
     {
       "program": 22,
@@ -210,7 +320,12 @@
       "instrumentName": "Harmonica",
       "sampleLength": 5382,
       "sampleRate": 32000,
-      "rootKey": 64
+      "rootKey": 64,
+      "loopStart": 9253931,
+      "loopEnd": 9254124,
+      "sampleStart": 9248786,
+      "sampleEnd": 9254168,
+      "loopEnabled": true
     },
     {
       "program": 23,
@@ -219,7 +334,12 @@
       "instrumentName": "Bandoneon_1",
       "sampleLength": 10602,
       "sampleRate": 44100,
-      "rootKey": 54
+      "rootKey": 54,
+      "loopStart": 10068533,
+      "loopEnd": 10068768,
+      "sampleStart": 10058174,
+      "sampleEnd": 10068776,
+      "loopEnabled": true
     },
     {
       "program": 24,
@@ -228,7 +348,12 @@
       "instrumentName": "Nylon Guitar",
       "sampleLength": 23649,
       "sampleRate": 44100,
-      "rootKey": 53
+      "rootKey": 53,
+      "loopStart": 12177270,
+      "loopEnd": 12177523,
+      "sampleStart": 12153924,
+      "sampleEnd": 12177573,
+      "loopEnabled": true
     },
     {
       "program": 25,
@@ -237,7 +362,12 @@
       "instrumentName": "Steel Guitar",
       "sampleLength": 27327,
       "sampleRate": 24000,
-      "rootKey": 40
+      "rootKey": 40,
+      "loopStart": 11819527,
+      "loopEnd": 11827062,
+      "sampleStart": 11799752,
+      "sampleEnd": 11827079,
+      "loopEnabled": true
     },
     {
       "program": 26,
@@ -246,7 +376,12 @@
       "instrumentName": "Jazz Guitar",
       "sampleLength": 9448,
       "sampleRate": 22050,
-      "rootKey": 40
+      "rootKey": 40,
+      "loopStart": 9746991,
+      "loopEnd": 9747258,
+      "sampleStart": 9737860,
+      "sampleEnd": 9747308,
+      "loopEnabled": true
     },
     {
       "program": 27,
@@ -255,7 +390,12 @@
       "instrumentName": "Clean Guitar",
       "sampleLength": 20692,
       "sampleRate": 25000,
-      "rootKey": 40
+      "rootKey": 40,
+      "loopStart": 14624338,
+      "loopEnd": 14625849,
+      "sampleStart": 14605189,
+      "sampleEnd": 14625881,
+      "loopEnabled": true
     },
     {
       "program": 28,
@@ -264,7 +404,12 @@
       "instrumentName": "Muted Guitar",
       "sampleLength": 14839,
       "sampleRate": 22050,
-      "rootKey": 47
+      "rootKey": 47,
+      "loopStart": 12007106,
+      "loopEnd": 12007285,
+      "sampleStart": 11992879,
+      "sampleEnd": 12007718,
+      "loopEnabled": true
     },
     {
       "program": 29,
@@ -273,7 +418,12 @@
       "instrumentName": "Overdrive Guitar",
       "sampleLength": 21938,
       "sampleRate": 22050,
-      "rootKey": 38
+      "rootKey": 38,
+      "loopStart": 648333,
+      "loopEnd": 648632,
+      "sampleStart": 626704,
+      "sampleEnd": 648642,
+      "loopEnabled": true
     },
     {
       "program": 30,
@@ -282,7 +432,12 @@
       "instrumentName": "Distortion Guitar_1",
       "sampleLength": 16576,
       "sampleRate": 14998,
-      "rootKey": 40
+      "rootKey": 40,
+      "loopStart": 8672427,
+      "loopEnd": 8672610,
+      "sampleStart": 8656155,
+      "sampleEnd": 8672731,
+      "loopEnabled": true
     },
     {
       "program": 31,
@@ -291,7 +446,12 @@
       "instrumentName": "Guitar Harmonics",
       "sampleLength": 7935,
       "sampleRate": 44100,
-      "rootKey": 62
+      "rootKey": 62,
+      "loopStart": 14738563,
+      "loopEnd": 14738751,
+      "sampleStart": 14730824,
+      "sampleEnd": 14738759,
+      "loopEnabled": true
     },
     {
       "program": 32,
@@ -300,7 +460,12 @@
       "instrumentName": "Acoustic Bass_1",
       "sampleLength": 13824,
       "sampleRate": 44100,
-      "rootKey": 72
+      "rootKey": 72,
+      "loopStart": 13137,
+      "loopEnd": 13812,
+      "sampleStart": 0,
+      "sampleEnd": 13824,
+      "loopEnabled": true
     },
     {
       "program": 33,
@@ -309,7 +474,12 @@
       "instrumentName": "Finger Bass",
       "sampleLength": 10549,
       "sampleRate": 44100,
-      "rootKey": 54
+      "rootKey": 54,
+      "loopStart": 13773104,
+      "loopEnd": 13773344,
+      "sampleStart": 13762804,
+      "sampleEnd": 13773353,
+      "loopEnabled": true
     },
     {
       "program": 34,
@@ -318,7 +488,12 @@
       "instrumentName": "Pick Bass",
       "sampleLength": 20723,
       "sampleRate": 44100,
-      "rootKey": 42
+      "rootKey": 42,
+      "loopStart": 13731485,
+      "loopEnd": 13731970,
+      "sampleStart": 13711445,
+      "sampleEnd": 13732168,
+      "loopEnabled": true
     },
     {
       "program": 35,
@@ -327,7 +502,12 @@
       "instrumentName": "Fretless Bass",
       "sampleLength": 14957,
       "sampleRate": 22050,
-      "rootKey": 32
+      "rootKey": 32,
+      "loopStart": 11404392,
+      "loopEnd": 11404816,
+      "sampleStart": 11389936,
+      "sampleEnd": 11404893,
+      "loopEnabled": true
     },
     {
       "program": 36,
@@ -336,7 +516,12 @@
       "instrumentName": "Slap Bass 1",
       "sampleLength": 7585,
       "sampleRate": 38000,
-      "rootKey": 24
+      "rootKey": 24,
+      "loopStart": 9602711,
+      "loopEnd": 9603873,
+      "sampleStart": 9596307,
+      "sampleEnd": 9603892,
+      "loopEnabled": true
     },
     {
       "program": 37,
@@ -345,7 +530,12 @@
       "instrumentName": "Slap Bass 2_F",
       "sampleLength": 11911,
       "sampleRate": 29762,
-      "rootKey": 33
+      "rootKey": 33,
+      "loopStart": 3260968,
+      "loopEnd": 3261504,
+      "sampleStart": 3249668,
+      "sampleEnd": 3261579,
+      "loopEnabled": true
     },
     {
       "program": 38,
@@ -354,7 +544,12 @@
       "instrumentName": "0 Pulse 37.5%",
       "sampleLength": 1610,
       "sampleRate": 44000,
-      "rootKey": 33
+      "rootKey": 33,
+      "loopStart": 15456269,
+      "loopEnd": 15457069,
+      "sampleStart": 15455469,
+      "sampleEnd": 15457079,
+      "loopEnabled": true
     },
     {
       "program": 39,
@@ -363,7 +558,12 @@
       "instrumentName": "Synth Bass 2_1",
       "sampleLength": 22704,
       "sampleRate": 44100,
-      "rootKey": 39
+      "rootKey": 39,
+      "loopStart": 2673748,
+      "loopEnd": 2676040,
+      "sampleStart": 2653368,
+      "sampleEnd": 2676072,
+      "loopEnabled": true
     },
     {
       "program": 40,
@@ -372,7 +572,12 @@
       "instrumentName": "Violin_1",
       "sampleLength": 36598,
       "sampleRate": 27174,
-      "rootKey": 56
+      "rootKey": 56,
+      "loopStart": 1584488,
+      "loopEnd": 1598143,
+      "sampleStart": 1561547,
+      "sampleEnd": 1598145,
+      "loopEnabled": true
     },
     {
       "program": 41,
@@ -381,7 +586,12 @@
       "instrumentName": "Viola",
       "sampleLength": 29661,
       "sampleRate": 30002,
-      "rootKey": 49
+      "rootKey": 49,
+      "loopStart": 14986876,
+      "loopEnd": 14992510,
+      "sampleStart": 14962881,
+      "sampleEnd": 14992542,
+      "loopEnabled": true
     },
     {
       "program": 42,
@@ -390,7 +600,12 @@
       "instrumentName": "Cello_P",
       "sampleLength": 40483,
       "sampleRate": 29998,
-      "rootKey": 37
+      "rootKey": 37,
+      "loopStart": 3154712,
+      "loopEnd": 3161236,
+      "sampleStart": 3120785,
+      "sampleEnd": 3161268,
+      "loopEnabled": true
     },
     {
       "program": 43,
@@ -399,7 +614,12 @@
       "instrumentName": "Double Bass",
       "sampleLength": 14112,
       "sampleRate": 33000,
-      "rootKey": 31
+      "rootKey": 31,
+      "loopStart": 7863360,
+      "loopEnd": 7869760,
+      "sampleStart": 7855680,
+      "sampleEnd": 7869792,
+      "loopEnabled": true
     },
     {
       "program": 44,
@@ -408,7 +628,12 @@
       "instrumentName": "Strings_2",
       "sampleLength": 68615,
       "sampleRate": 32000,
-      "rootKey": 36
+      "rootKey": 36,
+      "loopStart": 4326187,
+      "loopEnd": 4375024,
+      "sampleStart": 4306411,
+      "sampleEnd": 4375026,
+      "loopEnabled": true
     },
     {
       "program": 45,
@@ -417,7 +642,12 @@
       "instrumentName": "Pizzicato Strings",
       "sampleLength": 20739,
       "sampleRate": 22505,
-      "rootKey": 46
+      "rootKey": 46,
+      "loopStart": 12864291,
+      "loopEnd": 12864323,
+      "sampleStart": 12843616,
+      "sampleEnd": 12864355,
+      "loopEnabled": true
     },
     {
       "program": 46,
@@ -426,7 +656,12 @@
       "instrumentName": "Orchestral Harp",
       "sampleLength": 18349,
       "sampleRate": 21605,
-      "rootKey": 52
+      "rootKey": 52,
+      "loopStart": 7593010,
+      "loopEnd": 7595110,
+      "sampleStart": 7576793,
+      "sampleEnd": 7595142,
+      "loopEnabled": true
     },
     {
       "program": 47,
@@ -435,7 +670,12 @@
       "instrumentName": "Timpani_1",
       "sampleLength": 25643,
       "sampleRate": 11025,
-      "rootKey": 50
+      "rootKey": 50,
+      "loopStart": 10218420,
+      "loopEnd": 10224122,
+      "sampleStart": 10198502,
+      "sampleEnd": 10224145,
+      "loopEnabled": true
     },
     {
       "program": 48,
@@ -444,7 +684,12 @@
       "instrumentName": "Strings_1",
       "sampleLength": 73222,
       "sampleRate": 32000,
-      "rootKey": 39
+      "rootKey": 39,
+      "loopStart": 4253812,
+      "loopEnd": 4306362,
+      "sampleStart": 4233143,
+      "sampleEnd": 4306365,
+      "loopEnabled": true
     },
     {
       "program": 49,
@@ -453,7 +698,12 @@
       "instrumentName": "Strings_1",
       "sampleLength": 73222,
       "sampleRate": 32000,
-      "rootKey": 39
+      "rootKey": 39,
+      "loopStart": 4253812,
+      "loopEnd": 4306362,
+      "sampleStart": 4233143,
+      "sampleEnd": 4306365,
+      "loopEnabled": true
     },
     {
       "program": 50,
@@ -462,7 +712,12 @@
       "instrumentName": "Synth Strings 1",
       "sampleLength": 52485,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7168347,
+      "loopEnd": 7216393,
+      "sampleStart": 7164735,
+      "sampleEnd": 7217220,
+      "loopEnabled": true
     },
     {
       "program": 51,
@@ -471,7 +726,12 @@
       "instrumentName": "Synth Strings 2_2",
       "sampleLength": 19109,
       "sampleRate": 44100,
-      "rootKey": 57
+      "rootKey": 57,
+      "loopStart": 14524733,
+      "loopEnd": 14543828,
+      "sampleStart": 14524728,
+      "sampleEnd": 14543837,
+      "loopEnabled": true
     },
     {
       "program": 52,
@@ -480,7 +740,12 @@
       "instrumentName": "Concert Choir",
       "sampleLength": 33542,
       "sampleRate": 28000,
-      "rootKey": 45
+      "rootKey": 45,
+      "loopStart": 9129354,
+      "loopEnd": 9146501,
+      "sampleStart": 9113009,
+      "sampleEnd": 9146551,
+      "loopEnabled": true
     },
     {
       "program": 53,
@@ -489,7 +754,12 @@
       "instrumentName": "Voice Oohs",
       "sampleLength": 15996,
       "sampleRate": 44100,
-      "rootKey": 63
+      "rootKey": 63,
+      "loopStart": 14755937,
+      "loopEnd": 14763647,
+      "sampleStart": 14747659,
+      "sampleEnd": 14763655,
+      "loopEnabled": true
     },
     {
       "program": 54,
@@ -498,7 +768,12 @@
       "instrumentName": "Synth Voice",
       "sampleLength": 41212,
       "sampleRate": 28800,
-      "rootKey": 55
+      "rootKey": 55,
+      "loopStart": 9935117,
+      "loopEnd": 9971669,
+      "sampleStart": 9930526,
+      "sampleEnd": 9971738,
+      "loopEnabled": true
     },
     {
       "program": 55,
@@ -507,7 +782,12 @@
       "instrumentName": "Orchestra Hit",
       "sampleLength": 12684,
       "sampleRate": 23000,
-      "rootKey": 76
+      "rootKey": 76,
+      "loopStart": 10165323,
+      "loopEnd": 10178003,
+      "sampleStart": 10165319,
+      "sampleEnd": 10178003,
+      "loopEnabled": true
     },
     {
       "program": 56,
@@ -516,7 +796,12 @@
       "instrumentName": "Trumpet 3",
       "sampleLength": 11011,
       "sampleRate": 31245,
-      "rootKey": 58
+      "rootKey": 58,
+      "loopStart": 9568081,
+      "loopEnd": 9568215,
+      "sampleStart": 9557273,
+      "sampleEnd": 9568284,
+      "loopEnabled": true
     },
     {
       "program": 57,
@@ -525,7 +810,12 @@
       "instrumentName": "Trombone 3",
       "sampleLength": 15893,
       "sampleRate": 44100,
-      "rootKey": 37
+      "rootKey": 37,
+      "loopStart": 11075546,
+      "loopEnd": 11076181,
+      "sampleStart": 11060296,
+      "sampleEnd": 11076189,
+      "loopEnabled": true
     },
     {
       "program": 58,
@@ -534,7 +824,12 @@
       "instrumentName": "Tuba",
       "sampleLength": 5063,
       "sampleRate": 19980,
-      "rootKey": 30
+      "rootKey": 30,
+      "loopStart": 12733477,
+      "loopEnd": 12733909,
+      "sampleStart": 12728851,
+      "sampleEnd": 12733914,
+      "loopEnabled": true
     },
     {
       "program": 59,
@@ -543,7 +838,12 @@
       "instrumentName": "Muted Trumpet",
       "sampleLength": 14253,
       "sampleRate": 30637,
-      "rootKey": 62
+      "rootKey": 62,
+      "loopStart": 12794154,
+      "loopEnd": 12796754,
+      "sampleStart": 12782533,
+      "sampleEnd": 12796786,
+      "loopEnabled": true
     },
     {
       "program": 60,
@@ -552,7 +852,12 @@
       "instrumentName": "French Horns_1",
       "sampleLength": 39683,
       "sampleRate": 44100,
-      "rootKey": 63
+      "rootKey": 63,
+      "loopStart": 2516539,
+      "loopEnd": 2537553,
+      "sampleStart": 2497982,
+      "sampleEnd": 2537665,
+      "loopEnabled": true
     },
     {
       "program": 61,
@@ -561,7 +866,12 @@
       "instrumentName": "Brass Section",
       "sampleLength": 100432,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 13584851,
+      "loopEnd": 13659251,
+      "sampleStart": 13558827,
+      "sampleEnd": 13659259,
+      "loopEnabled": true
     },
     {
       "program": 62,
@@ -570,7 +880,12 @@
       "instrumentName": "0 Saw",
       "sampleLength": 2008,
       "sampleRate": 44000,
-      "rootKey": 33
+      "rootKey": 33,
+      "loopStart": 15471647,
+      "loopEnd": 15472447,
+      "sampleStart": 15470447,
+      "sampleEnd": 15472455,
+      "loopEnabled": true
     },
     {
       "program": 63,
@@ -579,7 +894,12 @@
       "instrumentName": "0 Saw",
       "sampleLength": 2008,
       "sampleRate": 44000,
-      "rootKey": 33
+      "rootKey": 33,
+      "loopStart": 15471647,
+      "loopEnd": 15472447,
+      "sampleStart": 15470447,
+      "sampleEnd": 15472455,
+      "loopEnabled": true
     },
     {
       "program": 64,
@@ -588,7 +908,12 @@
       "instrumentName": "Soprano Sax",
       "sampleLength": 17459,
       "sampleRate": 44100,
-      "rootKey": 69
+      "rootKey": 69,
+      "loopStart": 12629697,
+      "loopEnd": 12635153,
+      "sampleStart": 12617702,
+      "sampleEnd": 12635161,
+      "loopEnabled": true
     },
     {
       "program": 65,
@@ -597,7 +922,12 @@
       "instrumentName": "Alto Sax",
       "sampleLength": 21818,
       "sampleRate": 44100,
-      "rootKey": 53
+      "rootKey": 53,
+      "loopStart": 918902,
+      "loopEnd": 919155,
+      "sampleStart": 897440,
+      "sampleEnd": 919258,
+      "loopEnabled": true
     },
     {
       "program": 66,
@@ -606,7 +936,12 @@
       "instrumentName": "Tenor Sax",
       "sampleLength": 5464,
       "sampleRate": 44100,
-      "rootKey": 54
+      "rootKey": 54,
+      "loopStart": 12496112,
+      "loopEnd": 12496351,
+      "sampleStart": 12490897,
+      "sampleEnd": 12496361,
+      "loopEnabled": true
     },
     {
       "program": 67,
@@ -615,7 +950,12 @@
       "instrumentName": "Baritone Sax",
       "sampleLength": 13696,
       "sampleRate": 44100,
-      "rootKey": 50
+      "rootKey": 50,
+      "loopStart": 14722564,
+      "loopEnd": 14722865,
+      "sampleStart": 14709492,
+      "sampleEnd": 14723188,
+      "loopEnabled": true
     },
     {
       "program": 68,
@@ -624,7 +964,12 @@
       "instrumentName": "Oboe",
       "sampleLength": 30557,
       "sampleRate": 24947,
-      "rootKey": 61
+      "rootKey": 61,
+      "loopStart": 14450626,
+      "loopEnd": 14456130,
+      "sampleStart": 14425578,
+      "sampleEnd": 14456135,
+      "loopEnabled": true
     },
     {
       "program": 69,
@@ -633,7 +978,12 @@
       "instrumentName": "English Horn",
       "sampleLength": 11467,
       "sampleRate": 27174,
-      "rootKey": 58
+      "rootKey": 58,
+      "loopStart": 1203348,
+      "loopEnd": 1209138,
+      "sampleStart": 1197703,
+      "sampleEnd": 1209170,
+      "loopEnabled": true
     },
     {
       "program": 70,
@@ -642,7 +992,12 @@
       "instrumentName": "Bassoon",
       "sampleLength": 5973,
       "sampleRate": 33000,
-      "rootKey": 36
+      "rootKey": 36,
+      "loopStart": 11272133,
+      "loopEnd": 11272634,
+      "sampleStart": 11266693,
+      "sampleEnd": 11272666,
+      "loopEnabled": true
     },
     {
       "program": 71,
@@ -651,7 +1006,12 @@
       "instrumentName": "Clarinet",
       "sampleLength": 4293,
       "sampleRate": 16796,
-      "rootKey": 53
+      "rootKey": 53,
+      "loopStart": 12324117,
+      "loopEnd": 12325836,
+      "sampleStart": 12321575,
+      "sampleEnd": 12325868,
+      "loopEnabled": true
     },
     {
       "program": 72,
@@ -660,7 +1020,12 @@
       "instrumentName": "Piccolo",
       "sampleLength": 19535,
       "sampleRate": 27778,
-      "rootKey": 82
+      "rootKey": 82,
+      "loopStart": 12707387,
+      "loopEnd": 12712371,
+      "sampleStart": 12692841,
+      "sampleEnd": 12712376,
+      "loopEnabled": true
     },
     {
       "program": 73,
@@ -669,7 +1034,12 @@
       "instrumentName": "Flute",
       "sampleLength": 29646,
       "sampleRate": 32000,
-      "rootKey": 61
+      "rootKey": 61,
+      "loopStart": 2423713,
+      "loopEnd": 2435929,
+      "sampleStart": 2406291,
+      "sampleEnd": 2435937,
+      "loopEnabled": true
     },
     {
       "program": 74,
@@ -678,7 +1048,12 @@
       "instrumentName": "Recorder",
       "sampleLength": 39296,
       "sampleRate": 45000,
-      "rootKey": 62
+      "rootKey": 62,
+      "loopStart": 12426313,
+      "loopEnd": 12438742,
+      "sampleStart": 12399462,
+      "sampleEnd": 12438758,
+      "loopEnabled": true
     },
     {
       "program": 75,
@@ -687,7 +1062,12 @@
       "instrumentName": "Pan Flute",
       "sampleLength": 32355,
       "sampleRate": 30000,
-      "rootKey": 81
+      "rootKey": 81,
+      "loopStart": 11253002,
+      "loopEnd": 11266625,
+      "sampleStart": 11234292,
+      "sampleEnd": 11266647,
+      "loopEnabled": true
     },
     {
       "program": 76,
@@ -696,7 +1076,12 @@
       "instrumentName": "Bottle Blow_1",
       "sampleLength": 31616,
       "sampleRate": 22050,
-      "rootKey": 54
+      "rootKey": 54,
+      "loopStart": 11215953,
+      "loopEnd": 11229728,
+      "sampleStart": 11198171,
+      "sampleEnd": 11229787,
+      "loopEnabled": true
     },
     {
       "program": 77,
@@ -705,7 +1090,12 @@
       "instrumentName": "Shakuhachi",
       "sampleLength": 65678,
       "sampleRate": 44100,
-      "rootKey": 111
+      "rootKey": 111,
+      "loopStart": 11118774,
+      "loopEnd": 11140905,
+      "sampleStart": 11076235,
+      "sampleEnd": 11141913,
+      "loopEnabled": true
     },
     {
       "program": 78,
@@ -714,7 +1104,12 @@
       "instrumentName": "0 Sine",
       "sampleLength": 1024,
       "sampleRate": 48000,
-      "rootKey": 42
+      "rootKey": 42,
+      "loopStart": 6994496,
+      "loopEnd": 6995008,
+      "sampleStart": 6994240,
+      "sampleEnd": 6995264,
+      "loopEnabled": true
     },
     {
       "program": 79,
@@ -723,7 +1118,12 @@
       "instrumentName": "Ocarina",
       "sampleLength": 41740,
       "sampleRate": 25000,
-      "rootKey": 73
+      "rootKey": 73,
+      "loopStart": 15621505,
+      "loopEnd": 15646017,
+      "sampleStart": 15604285,
+      "sampleEnd": 15646025,
+      "loopEnabled": true
     },
     {
       "program": 80,
@@ -732,7 +1132,12 @@
       "instrumentName": "0 Pulse 50%",
       "sampleLength": 2008,
       "sampleRate": 44000,
-      "rootKey": 33
+      "rootKey": 33,
+      "loopStart": 15728782,
+      "loopEnd": 15729582,
+      "sampleStart": 15727582,
+      "sampleEnd": 15729590,
+      "loopEnabled": true
     },
     {
       "program": 81,
@@ -741,7 +1146,12 @@
       "instrumentName": "0 Saw",
       "sampleLength": 2008,
       "sampleRate": 44000,
-      "rootKey": 33
+      "rootKey": 33,
+      "loopStart": 15471647,
+      "loopEnd": 15472447,
+      "sampleStart": 15470447,
+      "sampleEnd": 15472455,
+      "loopEnabled": true
     },
     {
       "program": 82,
@@ -750,7 +1160,12 @@
       "instrumentName": "0 Triangle",
       "sampleLength": 2002,
       "sampleRate": 44000,
-      "rootKey": 33
+      "rootKey": 33,
+      "loopStart": 15479843,
+      "loopEnd": 15480643,
+      "sampleStart": 15478649,
+      "sampleEnd": 15480651,
+      "loopEnabled": true
     },
     {
       "program": 83,
@@ -759,7 +1174,12 @@
       "instrumentName": "Polysynth_1",
       "sampleLength": 52485,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7168347,
+      "loopEnd": 7216393,
+      "sampleStart": 7164735,
+      "sampleEnd": 7217220,
+      "loopEnabled": true
     },
     {
       "program": 84,
@@ -768,7 +1188,12 @@
       "instrumentName": "Charang_2",
       "sampleLength": 16576,
       "sampleRate": 14998,
-      "rootKey": 40
+      "rootKey": 40,
+      "loopStart": 8672427,
+      "loopEnd": 8672610,
+      "sampleStart": 8656155,
+      "sampleEnd": 8672731,
+      "loopEnabled": true
     },
     {
       "program": 85,
@@ -777,7 +1202,12 @@
       "instrumentName": "Solo Vox_1",
       "sampleLength": 6738,
       "sampleRate": 22050,
-      "rootKey": 55
+      "rootKey": 55,
+      "loopStart": 9767062,
+      "loopEnd": 9773657,
+      "sampleStart": 9766987,
+      "sampleEnd": 9773725,
+      "loopEnabled": true
     },
     {
       "program": 86,
@@ -786,7 +1216,12 @@
       "instrumentName": "5th Saw Wave",
       "sampleLength": 53652,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 11524808,
+      "loopEnd": 11572853,
+      "sampleStart": 11519744,
+      "sampleEnd": 11573396,
+      "loopEnabled": true
     },
     {
       "program": 87,
@@ -795,7 +1230,12 @@
       "instrumentName": "0 Pulse 37.5%",
       "sampleLength": 1610,
       "sampleRate": 44000,
-      "rootKey": 33
+      "rootKey": 33,
+      "loopStart": 15456269,
+      "loopEnd": 15457069,
+      "sampleStart": 15455469,
+      "sampleEnd": 15457079,
+      "loopEnabled": true
     },
     {
       "program": 88,
@@ -804,7 +1244,12 @@
       "instrumentName": "DX7_1",
       "sampleLength": 9353,
       "sampleRate": 11025,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 5534890,
+      "loopEnd": 5541966,
+      "sampleStart": 5532644,
+      "sampleEnd": 5541997,
+      "loopEnabled": true
     },
     {
       "program": 89,
@@ -813,7 +1258,12 @@
       "instrumentName": "Warm Pad",
       "sampleLength": 68615,
       "sampleRate": 32000,
-      "rootKey": 36
+      "rootKey": 36,
+      "loopStart": 4326187,
+      "loopEnd": 4375024,
+      "sampleStart": 4306411,
+      "sampleEnd": 4375026,
+      "loopEnabled": true
     },
     {
       "program": 90,
@@ -822,7 +1272,12 @@
       "instrumentName": "Polysynth_1",
       "sampleLength": 52485,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7168347,
+      "loopEnd": 7216393,
+      "sampleStart": 7164735,
+      "sampleEnd": 7217220,
+      "loopEnabled": true
     },
     {
       "program": 91,
@@ -831,7 +1286,12 @@
       "instrumentName": "Solo Vox_1",
       "sampleLength": 6738,
       "sampleRate": 22050,
-      "rootKey": 55
+      "rootKey": 55,
+      "loopStart": 9767062,
+      "loopEnd": 9773657,
+      "sampleStart": 9766987,
+      "sampleEnd": 9773725,
+      "loopEnabled": true
     },
     {
       "program": 92,
@@ -840,7 +1300,12 @@
       "instrumentName": "Bowed Glass",
       "sampleLength": 24868,
       "sampleRate": 48000,
-      "rootKey": 64
+      "rootKey": 64,
+      "loopStart": 11437121,
+      "loopEnd": 11461850,
+      "sampleStart": 11436990,
+      "sampleEnd": 11461858,
+      "loopEnabled": true
     },
     {
       "program": 93,
@@ -849,7 +1314,12 @@
       "instrumentName": "Synth Strings 2_1",
       "sampleLength": 19109,
       "sampleRate": 44100,
-      "rootKey": 57
+      "rootKey": 57,
+      "loopStart": 14524733,
+      "loopEnd": 14543828,
+      "sampleStart": 14524728,
+      "sampleEnd": 14543837,
+      "loopEnabled": true
     },
     {
       "program": 94,
@@ -858,7 +1328,12 @@
       "instrumentName": "Synth Strings",
       "sampleLength": 52485,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7168347,
+      "loopEnd": 7216393,
+      "sampleStart": 7164735,
+      "sampleEnd": 7217220,
+      "loopEnabled": true
     },
     {
       "program": 95,
@@ -867,7 +1342,12 @@
       "instrumentName": "Synth Strings",
       "sampleLength": 52485,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7168347,
+      "loopEnd": 7216393,
+      "sampleStart": 7164735,
+      "sampleEnd": 7217220,
+      "loopEnabled": true
     },
     {
       "program": 96,
@@ -876,7 +1356,12 @@
       "instrumentName": "Ice Rain_1",
       "sampleLength": 53652,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 11524808,
+      "loopEnd": 11572853,
+      "sampleStart": 11519744,
+      "sampleEnd": 11573396,
+      "loopEnabled": true
     },
     {
       "program": 97,
@@ -885,7 +1370,12 @@
       "instrumentName": "Soundtrack",
       "sampleLength": 32951,
       "sampleRate": 44100,
-      "rootKey": 84
+      "rootKey": 84,
+      "loopStart": 11488235,
+      "loopEnd": 11519690,
+      "sampleStart": 11486747,
+      "sampleEnd": 11519698,
+      "loopEnabled": true
     },
     {
       "program": 98,
@@ -894,7 +1384,12 @@
       "instrumentName": "Crystal_2",
       "sampleLength": 25341,
       "sampleRate": 48000,
-      "rootKey": 64
+      "rootKey": 64,
+      "loopStart": 15985810,
+      "loopEnd": 16010539,
+      "sampleStart": 15985206,
+      "sampleEnd": 16010547,
+      "loopEnabled": true
     },
     {
       "program": 99,
@@ -903,7 +1398,12 @@
       "instrumentName": "Atmosphere",
       "sampleLength": 23649,
       "sampleRate": 44100,
-      "rootKey": 53
+      "rootKey": 53,
+      "loopStart": 12177270,
+      "loopEnd": 12177523,
+      "sampleStart": 12153924,
+      "sampleEnd": 12177573,
+      "loopEnabled": true
     },
     {
       "program": 100,
@@ -912,7 +1412,12 @@
       "instrumentName": "Bright Saw Stack",
       "sampleLength": 52485,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7168347,
+      "loopEnd": 7216393,
+      "sampleStart": 7164735,
+      "sampleEnd": 7217220,
+      "loopEnabled": true
     },
     {
       "program": 101,
@@ -921,7 +1426,12 @@
       "instrumentName": "Goblin",
       "sampleLength": 11148,
       "sampleRate": 44100,
-      "rootKey": 72
+      "rootKey": 72,
+      "loopStart": 8056679,
+      "loopEnd": 8067757,
+      "sampleStart": 8056617,
+      "sampleEnd": 8067765,
+      "loopEnabled": true
     },
     {
       "program": 102,
@@ -930,7 +1440,12 @@
       "instrumentName": "Halo Pad",
       "sampleLength": 41212,
       "sampleRate": 28800,
-      "rootKey": 55
+      "rootKey": 55,
+      "loopStart": 9935117,
+      "loopEnd": 9971669,
+      "sampleStart": 9930526,
+      "sampleEnd": 9971738,
+      "loopEnabled": true
     },
     {
       "program": 103,
@@ -939,7 +1454,12 @@
       "instrumentName": "Synth Strings 2_1",
       "sampleLength": 19109,
       "sampleRate": 44100,
-      "rootKey": 57
+      "rootKey": 57,
+      "loopStart": 14524733,
+      "loopEnd": 14543828,
+      "sampleStart": 14524728,
+      "sampleEnd": 14543837,
+      "loopEnabled": true
     },
     {
       "program": 104,
@@ -948,7 +1468,12 @@
       "instrumentName": "Sitar",
       "sampleLength": 39475,
       "sampleRate": 22050,
-      "rootKey": 43
+      "rootKey": 43,
+      "loopStart": 11942603,
+      "loopEnd": 11982062,
+      "sampleStart": 11942595,
+      "sampleEnd": 11982070,
+      "loopEnabled": true
     },
     {
       "program": 105,
@@ -957,7 +1482,12 @@
       "instrumentName": "Banjo",
       "sampleLength": 7553,
       "sampleRate": 44100,
-      "rootKey": 54
+      "rootKey": 54,
+      "loopStart": 10057824,
+      "loopEnd": 10058062,
+      "sampleStart": 10050575,
+      "sampleEnd": 10058128,
+      "loopEnabled": true
     },
     {
       "program": 106,
@@ -966,7 +1496,12 @@
       "instrumentName": "Shamisen",
       "sampleLength": 1240,
       "sampleRate": 44100,
-      "rootKey": 64
+      "rootKey": 64,
+      "loopStart": 7943662,
+      "loopEnd": 7943797,
+      "sampleStart": 7942589,
+      "sampleEnd": 7943829,
+      "loopEnabled": true
     },
     {
       "program": 107,
@@ -975,7 +1510,12 @@
       "instrumentName": "Koto",
       "sampleLength": 33213,
       "sampleRate": 31250,
-      "rootKey": 57
+      "rootKey": 57,
+      "loopStart": 10037193,
+      "loopEnd": 10037476,
+      "sampleStart": 10004316,
+      "sampleEnd": 10037529,
+      "loopEnabled": true
     },
     {
       "program": 108,
@@ -984,7 +1524,12 @@
       "instrumentName": "Kalimba",
       "sampleLength": 9390,
       "sampleRate": 44100,
-      "rootKey": 68
+      "rootKey": 68,
+      "loopStart": 14847062,
+      "loopEnd": 14847169,
+      "sampleStart": 14837787,
+      "sampleEnd": 14847177,
+      "loopEnabled": true
     },
     {
       "program": 109,
@@ -993,7 +1538,12 @@
       "instrumentName": "Bagpipes",
       "sampleLength": 28680,
       "sampleRate": 44100,
-      "rootKey": 72
+      "rootKey": 72,
+      "loopStart": 12271518,
+      "loopEnd": 12300001,
+      "sampleStart": 12271327,
+      "sampleEnd": 12300007,
+      "loopEnabled": true
     },
     {
       "program": 110,
@@ -1002,7 +1552,12 @@
       "instrumentName": "Violin_1",
       "sampleLength": 36598,
       "sampleRate": 27174,
-      "rootKey": 56
+      "rootKey": 56,
+      "loopStart": 1584488,
+      "loopEnd": 1598143,
+      "sampleStart": 1561547,
+      "sampleEnd": 1598145,
+      "loopEnabled": true
     },
     {
       "program": 111,
@@ -1011,7 +1566,12 @@
       "instrumentName": "Shenai",
       "sampleLength": 622,
       "sampleRate": 44100,
-      "rootKey": 70
+      "rootKey": 70,
+      "loopStart": 14850834,
+      "loopEnd": 14850928,
+      "sampleStart": 14850314,
+      "sampleEnd": 14850936,
+      "loopEnabled": true
     },
     {
       "program": 112,
@@ -1020,7 +1580,12 @@
       "instrumentName": "Tinker Bell",
       "sampleLength": 10063,
       "sampleRate": 44100,
-      "rootKey": 102
+      "rootKey": 102,
+      "loopStart": 14863686,
+      "loopEnd": 14864877,
+      "sampleStart": 14854822,
+      "sampleEnd": 14864885,
+      "loopEnabled": true
     },
     {
       "program": 113,
@@ -1029,7 +1594,12 @@
       "instrumentName": "Agogo",
       "sampleLength": 6341,
       "sampleRate": 44100,
-      "rootKey": 72
+      "rootKey": 72,
+      "loopStart": 10635932,
+      "loopEnd": 10642257,
+      "sampleStart": 10635924,
+      "sampleEnd": 10642265,
+      "loopEnabled": true
     },
     {
       "program": 114,
@@ -1038,7 +1608,12 @@
       "instrumentName": "Steel Drums",
       "sampleLength": 25910,
       "sampleRate": 29761,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7969609,
+      "loopEnd": 7969723,
+      "sampleStart": 7943875,
+      "sampleEnd": 7969785,
+      "loopEnabled": true
     },
     {
       "program": 115,
@@ -1047,7 +1622,12 @@
       "instrumentName": "Wood Block_1",
       "sampleLength": 1798,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 14867037,
+      "loopEnd": 14868825,
+      "sampleStart": 14867034,
+      "sampleEnd": 14868832,
+      "loopEnabled": true
     },
     {
       "program": 116,
@@ -1056,7 +1636,12 @@
       "instrumentName": "Taiko Drum",
       "sampleLength": 11853,
       "sampleRate": 22050,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 1078826,
+      "loopEnd": 1081200,
+      "sampleStart": 1069355,
+      "sampleEnd": 1081208,
+      "loopEnabled": true
     },
     {
       "program": 117,
@@ -1065,7 +1650,12 @@
       "instrumentName": "Melodic Tom",
       "sampleLength": 23712,
       "sampleRate": 32000,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 10541661,
+      "loopEnd": 10542258,
+      "sampleStart": 10519040,
+      "sampleEnd": 10542752,
+      "loopEnabled": true
     },
     {
       "program": 118,
@@ -1074,7 +1664,12 @@
       "instrumentName": "Synth Drum",
       "sampleLength": 14998,
       "sampleRate": 44100,
-      "rootKey": 72
+      "rootKey": 72,
+      "loopStart": 7918855,
+      "loopEnd": 7933852,
+      "sampleStart": 7918854,
+      "sampleEnd": 7933852,
+      "loopEnabled": true
     },
     {
       "program": 119,
@@ -1083,7 +1678,12 @@
       "instrumentName": "Reverse Cymbal",
       "sampleLength": 39341,
       "sampleRate": 28000,
-      "rootKey": 72
+      "rootKey": 72,
+      "loopStart": 7879475,
+      "loopEnd": 7918800,
+      "sampleStart": 7879467,
+      "sampleEnd": 7918808,
+      "loopEnabled": true
     },
     {
       "program": 120,
@@ -1092,7 +1692,12 @@
       "instrumentName": "Fret Noise",
       "sampleLength": 7783,
       "sampleRate": 44100,
-      "rootKey": 69
+      "rootKey": 69,
+      "loopStart": 14868881,
+      "loopEnd": 14876654,
+      "sampleStart": 14868878,
+      "sampleEnd": 14876661,
+      "loopEnabled": true
     },
     {
       "program": 121,
@@ -1101,7 +1706,12 @@
       "instrumentName": "Breath Noise",
       "sampleLength": 7417,
       "sampleRate": 28000,
-      "rootKey": 61
+      "rootKey": 61,
+      "loopStart": 7872012,
+      "loopEnd": 7879421,
+      "sampleStart": 7872004,
+      "sampleEnd": 7879421,
+      "loopEnabled": true
     },
     {
       "program": 122,
@@ -1110,7 +1720,12 @@
       "instrumentName": "Seashore",
       "sampleLength": 20853,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 14876710,
+      "loopEnd": 14897552,
+      "sampleStart": 14876707,
+      "sampleEnd": 14897560,
+      "loopEnabled": true
     },
     {
       "program": 123,
@@ -1119,7 +1734,12 @@
       "instrumentName": "Birds",
       "sampleLength": 107999,
       "sampleRate": 32000,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 15768587,
+      "loopEnd": 15876573,
+      "sampleStart": 15768582,
+      "sampleEnd": 15876581,
+      "loopEnabled": true
     },
     {
       "program": 124,
@@ -1128,7 +1748,12 @@
       "instrumentName": "Telephone 1",
       "sampleLength": 1584,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 7094867,
+      "loopEnd": 7096440,
+      "sampleStart": 7094860,
+      "sampleEnd": 7096444,
+      "loopEnabled": true
     },
     {
       "program": 125,
@@ -1137,7 +1762,12 @@
       "instrumentName": "Helicopter",
       "sampleLength": 12910,
       "sampleRate": 44100,
-      "rootKey": 38
+      "rootKey": 38,
+      "loopStart": 14897609,
+      "loopEnd": 14910508,
+      "sampleStart": 14897606,
+      "sampleEnd": 14910516,
+      "loopEnabled": true
     },
     {
       "program": 126,
@@ -1146,7 +1776,12 @@
       "instrumentName": "Applause",
       "sampleLength": 89498,
       "sampleRate": 25000,
-      "rootKey": 111
+      "rootKey": 111,
+      "loopStart": 12233109,
+      "loopEnd": 12267117,
+      "sampleStart": 12177619,
+      "sampleEnd": 12267117,
+      "loopEnabled": true
     },
     {
       "program": 127,
@@ -1155,7 +1790,12 @@
       "instrumentName": "Gun Shot",
       "sampleLength": 10420,
       "sampleRate": 44100,
-      "rootKey": 60
+      "rootKey": 60,
+      "loopStart": 8257526,
+      "loopEnd": 8267936,
+      "sampleStart": 8257523,
+      "sampleEnd": 8267943,
+      "loopEnabled": true
     }
   ]
 }
