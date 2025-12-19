@@ -3,7 +3,8 @@
   "private": true,
   "devDependencies": {
     "@types/webmidi": "^2.0.6",
-    "lerna": "^4.0.0"
+    "lerna": "^4.0.0",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "submodules": "git submodule update --init --recursive --remote",
@@ -29,6 +30,5 @@
       "**/sdk-parammgr",
       "**/sdk-parammgr/**"
     ]
-  },
-  "dependencies": {}
+  }
 }

@@ -68,12 +68,10 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 			/** @private @type {IWamExampleTemplateSynth} */
 			this._synth = null;
 
-			/** @private Store soundfont data until synth is created */
-			this._pendingSoundFontData = null;
-
-			/** @private Track current program number */
-			this._currentProgram = 0;
-
+			/** @private @type {ArrayBuffer} */
+			this._sf2Buffer = options.processorOptions
+				? options.processorOptions.sf2Buffer
+				: null;
 		}
 
 		/**
@@ -104,25 +102,26 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 		_initialize() {
 			console.log('[Processor] _initialize called');
 			super._initialize();
+
+			// Get SF2 buffer from constructor
+			const sf2Buffer = this._sf2Buffer;
+			if (!sf2Buffer) {
+				console.error('[Processor] No SF2 buffer provided in options');
+				return;
+			}
+
 			const synthConfig = {
 				passInput: false,
+				sf2Buffer: sf2Buffer, // Pass SF2 buffer in config so synth can parse all programs
 			};
+			// Create synth with SF2 buffer - it will parse all programs in constructor
 			this._synth = new WamExampleTemplateSynth(
 				this._parameterInterpolators,
 				this._samplesPerQuantum,
 				globalThis.sampleRate,
 				synthConfig
 			);
-			console.log('[Processor] Synth created');
-
-			// Load pending SoundFont data if available
-			if (this._pendingSoundFontData) {
-				console.log('[Processor] Loading pending SoundFont data');
-				// @ts-ignore
-				this._synth.loadSoundFontData(this._pendingSoundFontData);
-				this._pendingSoundFontData = null;
-			}
-
+			console.log('[Processor] Synth created with SF2 buffer');
 			console.log('[Processor] _initialize complete');
 		}
 

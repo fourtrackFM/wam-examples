@@ -38,6 +38,373 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		return Math.pow(2.0, (note - 69) / 12.0) * 440.0;
 	}
 
+	// Inline SF2 parser code so it's available in the worklet
+	// Generator enumerators from SF2 spec section 8.1.2
+	const GeneratorType = {
+		startAddrsOffset: 0,
+		endAddrsOffset: 1,
+		startloopAddrsOffset: 2,
+		endloopAddrsOffset: 3,
+		startAddrsCoarseOffset: 4,
+		instrument: 41,
+		keyRange: 43,
+		velRange: 44,
+		sampleID: 53,
+		overridingRootKey: 58,
+	};
+
+	/**
+	 * Parse SF2 file and extract instrument data for a program
+	 * @param {ArrayBuffer} arrayBuffer
+	 * @param {number} programNumber - MIDI program number (0-127)
+	 * @param {number} bankNumber - MIDI bank number (default 0)
+	 * @returns {Object} Parsed instrument data with samples
+	 */
+	function parseSF2(arrayBuffer, programNumber = 0, bankNumber = 0) {
+		const dataView = new DataView(arrayBuffer);
+		let offset = 0;
+
+		function readString(length) {
+			const chars = [];
+			for (let i = 0; i < length; i++) {
+				const char = dataView.getUint8(offset++);
+				if (char !== 0) chars.push(String.fromCharCode(char));
+			}
+			return chars.join('');
+		}
+
+		function readDWord() {
+			const value = dataView.getUint32(offset, true);
+			offset += 4;
+			return value;
+		}
+
+		function readWord() {
+			const value = dataView.getUint16(offset, true);
+			offset += 2;
+			return value;
+		}
+
+		function readShort() {
+			const value = dataView.getInt16(offset, true);
+			offset += 2;
+			return value;
+		}
+
+		function readByte() {
+			return dataView.getUint8(offset++);
+		}
+
+		function readChar() {
+			return dataView.getInt8(offset++);
+		}
+
+		// Read RIFF header
+		const riff = readString(4);
+		if (riff !== 'RIFF') throw new Error('Not a valid RIFF file');
+		const fileSize = readDWord();
+		const sfbk = readString(4);
+		if (sfbk !== 'sfbk') throw new Error('Not a valid SoundFont file');
+
+		// Parse main chunks
+		let sdtaOffset = 0;
+		let pdtaOffset = 0;
+
+		while (offset < arrayBuffer.byteLength - 8) {
+			const chunkId = readString(4);
+			const chunkSize = readDWord();
+			const chunkStart = offset;
+
+			if (chunkId === 'LIST') {
+				const listType = readString(4);
+				if (listType === 'sdta') sdtaOffset = chunkStart;
+				else if (listType === 'pdta') pdtaOffset = chunkStart;
+			}
+
+			offset = chunkStart + chunkSize;
+		}
+
+		// Parse sample data
+		let rawSampleData = null;
+		if (sdtaOffset) {
+			offset = sdtaOffset + 4;
+			const endOffset =
+				offset + dataView.getUint32(sdtaOffset - 4, true) - 4;
+
+			while (offset < endOffset - 8) {
+				const subChunkId = readString(4);
+				const subChunkSize = readDWord();
+
+				if (subChunkId === 'smpl') {
+					rawSampleData = new Int16Array(
+						arrayBuffer,
+						offset,
+						subChunkSize / 2
+					);
+					break;
+				}
+				offset += subChunkSize;
+			}
+		}
+
+		if (!rawSampleData) throw new Error('No sample data found');
+
+		// Parse hydra structures
+		const hydra = {
+			presetHeaders: [],
+			presetBags: [],
+			presetGens: [],
+			instruments: [],
+			instrumentBags: [],
+			instrumentGens: [],
+			sampleHeaders: [],
+		};
+
+		if (pdtaOffset) {
+			offset = pdtaOffset + 4;
+			const pdtaSize = dataView.getUint32(pdtaOffset - 4, true);
+			const endOffset = offset + pdtaSize - 4;
+
+			while (offset < endOffset - 8) {
+				const subChunkId = readString(4);
+				const subChunkSize = readDWord();
+				const subChunkStart = offset;
+
+				if (subChunkId === 'phdr') {
+					const count = Math.floor(subChunkSize / 38);
+					for (let i = 0; i < count; i++) {
+						hydra.presetHeaders.push({
+							name: readString(20),
+							preset: readWord(),
+							bank: readWord(),
+							bagIndex: readWord(),
+							library: readDWord(),
+							genre: readDWord(),
+							morphology: readDWord(),
+						});
+					}
+				} else if (subChunkId === 'pbag') {
+					const count = Math.floor(subChunkSize / 4);
+					for (let i = 0; i < count; i++) {
+						hydra.presetBags.push({
+							genIndex: readWord(),
+							modIndex: readWord(),
+						});
+					}
+				} else if (subChunkId === 'pgen') {
+					const count = Math.floor(subChunkSize / 4);
+					for (let i = 0; i < count; i++) {
+						hydra.presetGens.push({
+							oper: readWord(),
+							amount: readWord(),
+						});
+					}
+				} else if (subChunkId === 'inst') {
+					const count = Math.floor(subChunkSize / 22);
+					for (let i = 0; i < count; i++) {
+						hydra.instruments.push({
+							name: readString(20),
+							bagIndex: readWord(),
+						});
+					}
+				} else if (subChunkId === 'ibag') {
+					const count = Math.floor(subChunkSize / 4);
+					for (let i = 0; i < count; i++) {
+						hydra.instrumentBags.push({
+							genIndex: readWord(),
+							modIndex: readWord(),
+						});
+					}
+				} else if (subChunkId === 'igen') {
+					const count = Math.floor(subChunkSize / 4);
+					for (let i = 0; i < count; i++) {
+						hydra.instrumentGens.push({
+							oper: readWord(),
+							amount: readWord(),
+						});
+					}
+				} else if (subChunkId === 'shdr') {
+					const count = Math.floor(subChunkSize / 46);
+					for (let i = 0; i < count; i++) {
+						const name = readString(20);
+						const start = readDWord();
+						const end = readDWord();
+						const loopStart = readDWord();
+						const loopEnd = readDWord();
+						const sampleRate = readDWord();
+						const originalPitch = readByte();
+						const pitchCorrection = readChar();
+						const sampleLink = readWord();
+						const sampleType = readWord();
+
+						if (sampleType !== 0x8000) {
+							hydra.sampleHeaders.push({
+								name,
+								start,
+								end,
+								loopStart,
+								loopEnd,
+								sampleRate,
+								originalPitch,
+								pitchCorrection,
+								sampleLink,
+								sampleType,
+							});
+						}
+					}
+				}
+
+				offset = subChunkStart + subChunkSize;
+			}
+		}
+
+		// Find preset
+		let preset = null;
+		for (let i = 0; i < hydra.presetHeaders.length - 1; i++) {
+			const p = hydra.presetHeaders[i];
+			if (p.preset === programNumber && p.bank === bankNumber) {
+				preset = p;
+				break;
+			}
+		}
+
+		if (!preset) preset = hydra.presetHeaders[0];
+
+		// Get preset zones and find instrument
+		const nextBagIndex =
+			hydra.presetHeaders[hydra.presetHeaders.indexOf(preset) + 1]
+				.bagIndex;
+		const presetBags = hydra.presetBags.slice(
+			preset.bagIndex,
+			nextBagIndex
+		);
+
+		let instrumentId = null;
+		for (const bag of presetBags) {
+			const nextGenIndex =
+				presetBags.indexOf(bag) + 1 < presetBags.length
+					? presetBags[presetBags.indexOf(bag) + 1].genIndex
+					: hydra.presetGens.length;
+			const gens = hydra.presetGens.slice(bag.genIndex, nextGenIndex);
+
+			const instGen = gens.find(
+				(g) => g.oper === GeneratorType.instrument
+			);
+			if (instGen) {
+				instrumentId = instGen.amount;
+				break;
+			}
+		}
+
+		if (instrumentId === null || instrumentId >= hydra.instruments.length) {
+			throw new Error('No valid instrument found');
+		}
+
+		const instrument = hydra.instruments[instrumentId];
+
+		// Get instrument zones and find sample
+		const nextInstBagIndex =
+			instrumentId + 1 < hydra.instruments.length
+				? hydra.instruments[instrumentId + 1].bagIndex
+				: hydra.instrumentBags.length;
+		const instrumentBags = hydra.instrumentBags.slice(
+			instrument.bagIndex,
+			nextInstBagIndex
+		);
+
+		let sampleId = null;
+		let keyRange = { lo: 0, hi: 127 };
+		let velRange = { lo: 0, hi: 127 };
+		let overrideRootKey = null;
+
+		for (const bag of instrumentBags) {
+			const nextGenIndex =
+				instrumentBags.indexOf(bag) + 1 < instrumentBags.length
+					? instrumentBags[instrumentBags.indexOf(bag) + 1].genIndex
+					: hydra.instrumentGens.length;
+			const gens = hydra.instrumentGens.slice(bag.genIndex, nextGenIndex);
+
+			const sampleGen = gens.find(
+				(g) => g.oper === GeneratorType.sampleID
+			);
+			if (sampleGen) {
+				sampleId = sampleGen.amount;
+
+				const keyRangeGen = gens.find(
+					(g) => g.oper === GeneratorType.keyRange
+				);
+				if (keyRangeGen) {
+					keyRange = {
+						lo: keyRangeGen.amount & 0xff,
+						hi: (keyRangeGen.amount >> 8) & 0xff,
+					};
+				}
+
+				const velRangeGen = gens.find(
+					(g) => g.oper === GeneratorType.velRange
+				);
+				if (velRangeGen) {
+					velRange = {
+						lo: velRangeGen.amount & 0xff,
+						hi: (velRangeGen.amount >> 8) & 0xff,
+					};
+				}
+
+				const rootKeyGen = gens.find(
+					(g) => g.oper === GeneratorType.overridingRootKey
+				);
+				if (rootKeyGen) overrideRootKey = rootKeyGen.amount;
+
+				break;
+			}
+		}
+
+		if (sampleId === null || sampleId >= hydra.sampleHeaders.length) {
+			throw new Error('No valid sample found');
+		}
+
+		const sample = hydra.sampleHeaders[sampleId];
+		const sampleData = rawSampleData.slice(sample.start, sample.end);
+
+		return {
+			sampleData,
+			selectedSample: {
+				...sample,
+				rootKey: overrideRootKey || sample.originalPitch,
+				keyRange,
+				velRange,
+			},
+			sampleRate: sample.sampleRate,
+			program: programNumber,
+			presetName: preset.name,
+		};
+	}
+
+	/**
+	 * Parse all programs from SF2 file
+	 * @param {ArrayBuffer} arrayBuffer
+	 * @param {number} bankNumber
+	 * @returns {Array}
+	 */
+	function parseAllSF2Programs(arrayBuffer, bankNumber = 0) {
+		console.log('[Synth] Parsing all programs from SF2...');
+		const allPrograms = [];
+
+		for (let program = 0; program < 128; program++) {
+			try {
+				const programData = parseSF2(arrayBuffer, program, bankNumber);
+				if (programData && programData.sampleData) {
+					allPrograms.push(programData);
+				}
+			} catch (error) {
+				console.warn('[Synth] Failed to parse program', program);
+			}
+		}
+
+		console.log('[Synth] Parsed', allPrograms.length, 'programs');
+		return allPrograms;
+	}
+
 	/**
 	 * Synth part for mono channel rendering with sample playback
 	 * @class
@@ -324,6 +691,52 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			this._programMap = new Map();
 			this._currentProgram = 0;
 			this._sampleData = null;
+
+			// Parse all 128 MIDI programs at construction if sf2Buffer is provided in config
+			const sf2Buffer = config.sf2Buffer;
+			if (sf2Buffer) {
+				console.log('[Synth] Parsing all SF2 programs...');
+				const allPrograms = parseAllSF2Programs(sf2Buffer);
+				console.log('[Synth] Parsed', allPrograms.length, 'programs');
+
+				// Load all programs into the map
+				for (const programData of allPrograms) {
+					if (programData && programData.sampleData) {
+						this._programMap.set(programData.program, {
+							sampleData: programData.sampleData,
+							metadata: {
+								selectedSample: programData.selectedSample,
+								sampleRate: programData.sampleRate,
+								presetName: programData.presetName,
+							},
+						});
+					}
+				}
+
+				// Set initial program (0) if available
+				const program0 = this._programMap.get(0);
+				if (program0) {
+					this._sampleData = program0.sampleData;
+					const metadata = program0.metadata;
+					for (let i = 0; i < this._numVoices; i++) {
+						const voice = this._voices[i];
+						voice._leftPart.setSampleData(
+							this._sampleData,
+							metadata.selectedSample,
+							metadata.sampleRate
+						);
+						voice._rightPart.setSampleData(
+							this._sampleData,
+							metadata.selectedSample,
+							metadata.sampleRate
+						);
+					}
+					console.log(
+						'[Synth] Initial program 0 loaded:',
+						metadata.presetName
+					);
+				}
+			}
 		}
 
 		/**

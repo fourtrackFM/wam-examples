@@ -476,3 +476,68 @@ export function parseSF2(arrayBuffer, programNumber = 0, bankNumber = 0) {
 		instrumentName: instrument.name,
 	};
 }
+
+/**
+ * Parse all programs from an SF2 file
+ * @param {ArrayBuffer} arrayBuffer - SF2 file data
+ * @param {number} bankNumber - MIDI bank number (default 0)
+ * @returns {Array} Array of program data objects
+ */
+export function parseAllSF2Programs(arrayBuffer, bankNumber = 0) {
+	console.log(
+		'[SF2Parser] Parsing all programs from SF2 file, size:',
+		arrayBuffer.byteLength
+	);
+
+	const allPrograms = [];
+	const totalPrograms = 128;
+
+	for (let program = 0; program < totalPrograms; program++) {
+		try {
+			const programData = parseSF2(arrayBuffer, program, bankNumber);
+			if (programData && programData.sampleData) {
+				allPrograms.push(programData);
+			}
+		} catch (error) {
+			console.warn(
+				'[SF2Parser] Failed to parse program',
+				program,
+				':',
+				error.message
+			);
+		}
+	}
+
+	console.log(
+		'[SF2Parser] Successfully parsed',
+		allPrograms.length,
+		'programs'
+	);
+	return allPrograms;
+}
+
+/**
+ * Create a module getter for AudioWorklet - wraps the parser code to be transferred
+ * @param {string} [moduleId]
+ * @returns {Object}
+ */
+const getSF2Parser = (moduleId) => {
+	// This function will be serialized and sent to AudioWorklet
+	// We need to inline the parseSF2 and parseAllSF2Programs code here
+
+	/** @type {AudioWorkletGlobalScope} */
+	// @ts-ignore
+	const audioWorkletGlobalScope = globalThis;
+	const ModuleScope =
+		audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+
+	// Copy the full parseSF2 function from the module scope into the worklet
+	// Since we can't reference external code, we'll attach it later via import
+	// For now, make the functions available globally in the worklet
+	ModuleScope.parseSF2 = parseSF2;
+	ModuleScope.parseAllSF2Programs = parseAllSF2Programs;
+
+	return {};
+};
+
+export default getSF2Parser;
