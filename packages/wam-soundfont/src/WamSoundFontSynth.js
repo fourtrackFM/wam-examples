@@ -870,6 +870,199 @@ const getWamExampleTemplateSynth = (moduleId) => {
 	}
 
 	/**
+	 * Parse complete SF2 structure for debugging (worklet-compatible version)
+	 * @param {ArrayBuffer} arrayBuffer
+	 * @returns {Object} Complete hydra structure
+	 */
+	function parseCompleteSF2Structure(arrayBuffer) {
+		const dataView = new DataView(arrayBuffer);
+		let offset = 0;
+
+		const readString = (length) => {
+			const chars = [];
+			for (let i = 0; i < length; i++) {
+				const char = dataView.getUint8(offset + i);
+				if (char === 0) break;
+				chars.push(char);
+			}
+			offset += length;
+			return String.fromCharCode(...chars);
+		};
+
+		const readDWord = () => {
+			const val = dataView.getUint32(offset, true);
+			offset += 4;
+			return val;
+		};
+
+		const readWord = () => {
+			const val = dataView.getUint16(offset, true);
+			offset += 2;
+			return val;
+		};
+
+		const readByte = () => {
+			const val = dataView.getUint8(offset);
+			offset += 1;
+			return val;
+		};
+
+		const readChar = () => {
+			const val = dataView.getInt8(offset);
+			offset += 1;
+			return val;
+		};
+
+		const hydra = {
+			presetHeaders: [],
+			presetBags: [],
+			presetMods: [],
+			presetGens: [],
+			instruments: [],
+			instrumentBags: [],
+			instrumentMods: [],
+			instrumentGens: [],
+			sampleHeaders: [],
+		};
+
+		// Skip RIFF header
+		offset = 12;
+
+		// Parse chunks
+		while (offset < arrayBuffer.byteLength - 8) {
+			const chunkId = readString(4);
+			const chunkSize = readDWord();
+			const chunkStart = offset;
+
+			if (chunkId === 'LIST') {
+				const listType = readString(4);
+
+				if (listType === 'pdta') {
+					while (offset < chunkStart + chunkSize) {
+						const subChunkId = readString(4);
+						const subChunkSize = readDWord();
+						const subChunkStart = offset;
+
+						if (subChunkId === 'phdr') {
+							const count = Math.floor(subChunkSize / 38);
+							for (let i = 0; i < count; i++) {
+								hydra.presetHeaders.push({
+									name: readString(20),
+									preset: readWord(),
+									bank: readWord(),
+									bagIndex: readWord(),
+									library: readDWord(),
+									genre: readDWord(),
+									morphology: readDWord(),
+								});
+							}
+						} else if (subChunkId === 'pbag') {
+							const count = Math.floor(subChunkSize / 4);
+							for (let i = 0; i < count; i++) {
+								hydra.presetBags.push({
+									genIndex: readWord(),
+									modIndex: readWord(),
+								});
+							}
+						} else if (subChunkId === 'pmod') {
+							const count = Math.floor(subChunkSize / 10);
+							for (let i = 0; i < count; i++) {
+								hydra.presetMods.push({
+									modSrcOper: readWord(),
+									modDestOper: readWord(),
+									modAmount: readWord(),
+									modAmtSrcOper: readWord(),
+									modTransOper: readWord(),
+								});
+							}
+						} else if (subChunkId === 'pgen') {
+							const count = Math.floor(subChunkSize / 4);
+							for (let i = 0; i < count; i++) {
+								hydra.presetGens.push({
+									oper: readWord(),
+									amount: readWord(),
+								});
+							}
+						} else if (subChunkId === 'inst') {
+							const count = Math.floor(subChunkSize / 22);
+							for (let i = 0; i < count; i++) {
+								hydra.instruments.push({
+									name: readString(20),
+									bagIndex: readWord(),
+								});
+							}
+						} else if (subChunkId === 'ibag') {
+							const count = Math.floor(subChunkSize / 4);
+							for (let i = 0; i < count; i++) {
+								hydra.instrumentBags.push({
+									genIndex: readWord(),
+									modIndex: readWord(),
+								});
+							}
+						} else if (subChunkId === 'imod') {
+							const count = Math.floor(subChunkSize / 10);
+							for (let i = 0; i < count; i++) {
+								hydra.instrumentMods.push({
+									modSrcOper: readWord(),
+									modDestOper: readWord(),
+									modAmount: readWord(),
+									modAmtSrcOper: readWord(),
+									modTransOper: readWord(),
+								});
+							}
+						} else if (subChunkId === 'igen') {
+							const count = Math.floor(subChunkSize / 4);
+							for (let i = 0; i < count; i++) {
+								hydra.instrumentGens.push({
+									oper: readWord(),
+									amount: readWord(),
+								});
+							}
+						} else if (subChunkId === 'shdr') {
+							const count = Math.floor(subChunkSize / 46);
+							for (let i = 0; i < count; i++) {
+								const name = readString(20);
+								const start = readDWord();
+								const end = readDWord();
+								const loopStart = readDWord();
+								const loopEnd = readDWord();
+								const sampleRate = readDWord();
+								const originalPitch = readByte();
+								const pitchCorrection = readChar();
+								const sampleLink = readWord();
+								const sampleType = readWord();
+
+								if (sampleType !== 0x8000) {
+									hydra.sampleHeaders.push({
+										name,
+										start,
+										end,
+										loopStart,
+										loopEnd,
+										sampleRate,
+										originalPitch,
+										pitchCorrection,
+										sampleLink,
+										sampleType,
+									});
+								}
+							}
+						}
+
+						offset = subChunkStart + subChunkSize;
+					}
+				} else {
+					offset = chunkStart + chunkSize;
+				}
+			} else {
+				offset = chunkStart + chunkSize;
+			}
+		}
+
+		return hydra;
+	}
+
+	/**
 	 * Synth part for mono channel rendering with sample playback
 	 * @class
 	 */
@@ -1071,6 +1264,15 @@ const getWamExampleTemplateSynth = (moduleId) => {
 
 			const gain = velocity / 127;
 			const frequency = noteToHz(note);
+
+			console.log('[Voice] noteOn:', {
+				note,
+				velocity,
+				gain,
+				frequency,
+				leftHasSample: !!this._leftPart._sampleData,
+				rightHasSample: !!this._rightPart._sampleData,
+			});
 
 			this._leftPart.start(gain, frequency);
 			this._rightPart.start(gain, frequency);
@@ -1353,6 +1555,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 * @param {number} velocity
 		 */
 		noteOn(channel, note, velocity) {
+			console.log('[Synth] noteOn called:', { channel, note, velocity });
 			// Stop any existing voices on this note
 			this.noteOff(channel, note, velocity);
 
@@ -1378,6 +1581,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				allocatedIdx = oldestIdx;
 			}
 
+			console.log('[Synth] Allocating voice:', allocatedIdx);
 			this._voiceStates[allocatedIdx] = 1;
 			this._voices[allocatedIdx].noteOn(channel, note, velocity);
 		}

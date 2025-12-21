@@ -79,8 +79,6 @@ export default class WamExampleTemplateNode extends WamNode {
 		this._gui = element;
 	}
 
-
-
 	/**
 	 * Set parameter values for the specified parameter ids.
 	 * GUI must be notified to stay synchronized.
