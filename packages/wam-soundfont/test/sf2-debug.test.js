@@ -5,62 +5,19 @@
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { parseCompleteSF2Structure } from '../src/WamSoundFontSynth.js';
+import {
+	parseCompleteSF2Structure,
+	interpretGeneratorValue,
+	getGeneratorNames,
+} from '../src/WamSoundFontSynth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const SF2_CACHE_PATH = path.join(__dirname, 'GeneralUser-GS.sf2');
 
-// Generator names for pretty printing
-const GENERATOR_NAMES = {
-	0: 'startAddrsOffset',
-	1: 'endAddrsOffset',
-	2: 'startloopAddrsOffset',
-	3: 'endloopAddrsOffset',
-	4: 'startAddrsCoarseOffset',
-	5: 'modLfoToPitch',
-	6: 'vibLfoToPitch',
-	7: 'modEnvToPitch',
-	8: 'initialFilterFc',
-	9: 'initialFilterQ',
-	10: 'modLfoToFilterFc',
-	11: 'modEnvToFilterFc',
-	12: 'endAddrsCoarseOffset',
-	13: 'modLfoToVolume',
-	15: 'chorusEffectsSend',
-	16: 'reverbEffectsSend',
-	17: 'pan',
-	21: 'delayModLFO',
-	22: 'freqModLFO',
-	23: 'delayVibLFO',
-	24: 'freqVibLFO',
-	25: 'delayModEnv',
-	26: 'attackModEnv',
-	27: 'holdModEnv',
-	28: 'decayModEnv',
-	29: 'sustainModEnv',
-	30: 'releaseModEnv',
-	33: 'delayVolEnv',
-	34: 'attackVolEnv',
-	35: 'holdVolEnv',
-	36: 'decayVolEnv',
-	37: 'sustainVolEnv',
-	38: 'releaseVolEnv',
-	41: 'instrument',
-	43: 'keyRange',
-	44: 'velRange',
-	46: 'keynum',
-	47: 'velocity',
-	48: 'initialAttenuation',
-	51: 'coarseTune',
-	52: 'fineTune',
-	53: 'sampleID',
-	54: 'sampleModes',
-	56: 'scaleTuning',
-	57: 'exclusiveClass',
-	58: 'overridingRootKey',
-};
+// Get generator names
+const GENERATOR_NAMES = getGeneratorNames();
 
 function getNoteNameFromMidi(midiNote) {
 	const noteNames = [
@@ -251,23 +208,103 @@ function runDebugTest() {
 	}
 
 	// ====================
-	// PRESET DETAIL EXAMPLE
+	// DETAILED PRESET ANALYSIS WITH GENERATORS
 	// ====================
 	console.log('\n' + '='.repeat(80));
-	console.log('DETAILED PRESET ANALYSIS - Program 0 (Grand Piano)');
+	console.log(
+		'DETAILED PRESET ANALYSIS - First 3 Presets with ALL Generators'
+	);
+	console.log('='.repeat(80));
+
+	for (
+		let presetIdx = 0;
+		presetIdx < Math.min(3, hydra.presetHeaders.length - 1);
+		presetIdx++
+	) {
+		const preset = hydra.presetHeaders[presetIdx];
+		const nextBagIdx = hydra.presetHeaders[presetIdx + 1].bagIndex;
+		const presetBags = hydra.presetBags.slice(preset.bagIndex, nextBagIdx);
+
+		console.log(`\n${'='.repeat(80)}`);
+		console.log(`PRESET ${presetIdx}: "${preset.name}"`);
+		console.log(`Program: ${preset.preset}, Bank: ${preset.bank}`);
+		console.log(`Number of zones: ${presetBags.length}`);
+		console.log('='.repeat(80));
+
+		// Print each zone with all its generators
+		presetBags.forEach((bag, bagIdx) => {
+			const nextGenIdx =
+				bagIdx + 1 < presetBags.length
+					? presetBags[bagIdx + 1].genIndex
+					: hydra.presetGens.length;
+			const gens = hydra.presetGens.slice(bag.genIndex, nextGenIdx);
+
+			console.log(`\n  Zone ${bagIdx}:`);
+
+			// Check if this is a global zone (no instrument generator)
+			const hasInstrument = gens.some((g) => g.oper === 41);
+			if (!hasInstrument && bagIdx === 0) {
+				console.log('    [GLOBAL ZONE]');
+			}
+
+			// Print all generators
+			gens.forEach((gen) => {
+				const name =
+					GENERATOR_NAMES[gen.oper] || `Unknown(${gen.oper})`;
+				const interpreted = interpretGeneratorValue(
+					gen.oper,
+					gen.amount
+				);
+				let valueStr;
+
+				// Special formatting for certain generators
+				if (gen.oper === 43) {
+					// keyRange
+					valueStr = `${interpreted.raw} (${getNoteNameFromMidi(
+						interpreted.lo
+					)}-${getNoteNameFromMidi(interpreted.hi)}, ${
+						interpreted.lo
+					}-${interpreted.hi})`;
+				} else if (gen.oper === 44) {
+					// velRange
+					valueStr = `${interpreted.raw} (${interpreted.lo}-${interpreted.hi})`;
+				} else if (gen.oper === 41) {
+					// instrument
+					const instName =
+						gen.amount < hydra.instruments.length
+							? hydra.instruments[gen.amount].name
+							: 'INVALID';
+					valueStr = `${gen.amount} "${instName}"`;
+				} else if (interpreted.unit) {
+					// Show both raw and interpreted value with unit
+					if (interpreted.unit === 'range') {
+						valueStr = `${interpreted.raw}`;
+					} else {
+						const displayValue =
+							typeof interpreted.value === 'number'
+								? interpreted.value.toFixed(2)
+								: interpreted.value;
+						valueStr = `${interpreted.raw} (${displayValue} ${interpreted.unit})`;
+					}
+				} else {
+					valueStr = `${interpreted.raw}`;
+				}
+
+				console.log(`    ${name.padEnd(30)} = ${valueStr}`);
+			});
+		});
+	}
+
+	// ====================
+	// ORIGINAL PRESET DETAIL EXAMPLE (keeping for reference)
+	// ====================
+	console.log('\n' + '='.repeat(80));
+	console.log("INSTRUMENT DETAIL - First Preset's First Instrument");
 	console.log('='.repeat(80));
 
 	const preset = hydra.presetHeaders[0];
 	const nextBagIdx = hydra.presetHeaders[1].bagIndex;
 	const presetBags = hydra.presetBags.slice(preset.bagIndex, nextBagIdx);
-
-	console.log('\nPreset Info:');
-	console.log('  Name:', preset.name);
-	console.log('  Program:', preset.preset);
-	console.log('  Bank:', preset.bank);
-	console.log('  Number of zones:', presetBags.length);
-
-	// Find instrument
 	let instrumentId = null;
 	for (const bag of presetBags) {
 		const nextGenIdx =

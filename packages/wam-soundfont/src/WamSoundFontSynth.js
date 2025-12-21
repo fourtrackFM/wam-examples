@@ -221,6 +221,258 @@ export function parseCompleteSF2Structure(arrayBuffer) {
 }
 
 /**
+ * Parse preset data with all generators for a specific preset
+ * @param {ArrayBuffer} arrayBuffer
+ * @param {number} presetIndex - Index of preset in preset headers array
+ * @returns {Object} Preset data with zones and generators
+ */
+export function parsePresetWithGenerators(arrayBuffer, presetIndex) {
+	const hydra = parseCompleteSF2Structure(arrayBuffer);
+
+	if (presetIndex >= hydra.presetHeaders.length - 1) {
+		throw new Error(`Invalid preset index ${presetIndex}`);
+	}
+
+	const preset = hydra.presetHeaders[presetIndex];
+	const nextBagIdx = hydra.presetHeaders[presetIndex + 1].bagIndex;
+	const presetBags = hydra.presetBags.slice(preset.bagIndex, nextBagIdx);
+
+	const zones = presetBags.map((bag, bagIdx) => {
+		const nextGenIdx =
+			bagIdx + 1 < presetBags.length
+				? presetBags[bagIdx + 1].genIndex
+				: hydra.presetGens.length;
+		const gens = hydra.presetGens.slice(bag.genIndex, nextGenIdx);
+
+		const nextModIdx =
+			bagIdx + 1 < presetBags.length
+				? presetBags[bagIdx + 1].modIndex
+				: hydra.presetMods.length;
+		const mods = hydra.presetMods.slice(bag.modIndex, nextModIdx);
+
+		// Convert generators array to object for easy access
+		const generators = {};
+		gens.forEach((gen) => {
+			generators[gen.oper] = gen.amount;
+		});
+
+		return {
+			zoneIndex: bagIdx,
+			generators,
+			modulators: mods,
+			isGlobal: bagIdx === 0 && !gens.some((g) => g.oper === 41),
+		};
+	});
+
+	return {
+		name: preset.name,
+		program: preset.preset,
+		bank: preset.bank,
+		zones,
+		hydra, // Include full hydra for instrument/sample lookups
+	};
+}
+
+/**
+ * Get all generator names mapping
+ * @returns {Object} Generator operator to name mapping
+ */
+export function getGeneratorNames() {
+	return {
+		0: 'startAddrsOffset',
+		1: 'endAddrsOffset',
+		2: 'startloopAddrsOffset',
+		3: 'endloopAddrsOffset',
+		4: 'startAddrsCoarseOffset',
+		5: 'modLfoToPitch',
+		6: 'vibLfoToPitch',
+		7: 'modEnvToPitch',
+		8: 'initialFilterFc',
+		9: 'initialFilterQ',
+		10: 'modLfoToFilterFc',
+		11: 'modEnvToFilterFc',
+		12: 'endAddrsCoarseOffset',
+		13: 'modLfoToVolume',
+		15: 'chorusEffectsSend',
+		16: 'reverbEffectsSend',
+		17: 'pan',
+		21: 'delayModLFO',
+		22: 'freqModLFO',
+		23: 'delayVibLFO',
+		24: 'freqVibLFO',
+		25: 'delayModEnv',
+		26: 'attackModEnv',
+		27: 'holdModEnv',
+		28: 'decayModEnv',
+		29: 'sustainModEnv',
+		30: 'releaseModEnv',
+		33: 'delayVolEnv',
+		34: 'attackVolEnv',
+		35: 'holdVolEnv',
+		36: 'decayVolEnv',
+		37: 'sustainVolEnv',
+		38: 'releaseVolEnv',
+		41: 'instrument',
+		43: 'keyRange',
+		44: 'velRange',
+		46: 'keynum',
+		47: 'velocity',
+		48: 'initialAttenuation',
+		51: 'coarseTune',
+		52: 'fineTune',
+		53: 'sampleID',
+		54: 'sampleModes',
+		56: 'scaleTuning',
+		57: 'exclusiveClass',
+		58: 'overridingRootKey',
+	};
+}
+
+/**
+ * Convert timecent value to milliseconds
+ * @param {number} timecents - Timecent value (signed 16-bit)
+ * @returns {number} Time in milliseconds
+ */
+export function timecentsToMilliseconds(timecents) {
+	// Timecents: 1200 log2(t) where t is in seconds
+	// So t = 2^(timecents/1200) seconds
+	return Math.pow(2, timecents / 1200) * 1000;
+}
+
+/**
+ * Convert centibel value to decibels
+ * @param {number} centibels - Centibel value
+ * @returns {number} Value in decibels
+ */
+export function centibelsToDecibels(centibels) {
+	return centibels / 10;
+}
+
+/**
+ * Convert absolute cent value to Hz
+ * @param {number} cents - Absolute cent value
+ * @returns {number} Frequency in Hz
+ */
+export function absoluteCentsToHz(cents) {
+	// Absolute cents: 1200 log2(f/8.176) where f is in Hz
+	// So f = 8.176 * 2^(cents/1200)
+	return 8.176 * Math.pow(2, cents / 1200);
+}
+
+/**
+ * Interpret generator value based on its type
+ * @param {number} operator - Generator operator
+ * @param {number} amount - Raw generator amount (as 16-bit signed or unsigned)
+ * @returns {Object} Interpreted value with unit
+ */
+export function interpretGeneratorValue(operator, amount) {
+	// Convert unsigned 16-bit to signed 16-bit where needed
+	const signed = amount > 32767 ? amount - 65536 : amount;
+
+	switch (operator) {
+		// Time values in timecents (absolute)
+		case 21: // delayModLFO
+		case 23: // delayVibLFO
+		case 25: // delayModEnv
+		case 26: // attackModEnv
+		case 27: // holdModEnv
+		case 28: // decayModEnv
+		case 30: // releaseModEnv
+		case 33: // delayVolEnv
+		case 34: // attackVolEnv
+		case 35: // holdVolEnv
+		case 36: // decayVolEnv
+		case 38: // releaseVolEnv
+			return {
+				raw: signed,
+				value: timecentsToMilliseconds(signed),
+				unit: 'msec',
+			};
+
+		// Sustain levels in centibels
+		case 29: // sustainModEnv
+		case 37: // sustainVolEnv
+			return {
+				raw: amount,
+				value: centibelsToDecibels(amount),
+				unit: 'dB',
+			};
+
+		// Attenuation in centibels
+		case 48: // initialAttenuation
+			return {
+				raw: amount,
+				value: centibelsToDecibels(amount),
+				unit: 'cB',
+			};
+
+		// Filter cutoff in absolute cents
+		case 8: // initialFilterFc
+			return {
+				raw: signed,
+				value: absoluteCentsToHz(signed),
+				unit: 'Hz',
+			};
+
+		// Frequency in absolute cents
+		case 22: // freqModLFO
+		case 24: // freqVibLFO
+			return {
+				raw: signed,
+				value: absoluteCentsToHz(signed) / 8.176, // Convert to Hz
+				unit: 'Hz',
+			};
+
+		// Percent values (0-1000 = 0-100%)
+		case 15: // chorusEffectsSend
+		case 16: // reverbEffectsSend
+			return {
+				raw: amount,
+				value: amount / 10,
+				unit: '%',
+			};
+
+		// Pan (-500 to 500 = left to right)
+		case 17: // pan
+			return {
+				raw: signed,
+				value: signed / 10,
+				unit: '‰', // permille
+			};
+
+		// Pitch in cents
+		case 5: // modLfoToPitch
+		case 6: // vibLfoToPitch
+		case 7: // modEnvToPitch
+		case 51: // coarseTune (semitones)
+		case 52: // fineTune (cents)
+			return {
+				raw: signed,
+				value: signed,
+				unit: 'cents',
+			};
+
+		// Range values (lo byte, hi byte)
+		case 43: // keyRange
+		case 44: // velRange
+			return {
+				raw: amount,
+				lo: amount & 0xff,
+				hi: (amount >> 8) & 0xff,
+				unit: 'range',
+			};
+
+		// Direct values
+		default:
+			return {
+				raw: amount,
+				value: amount,
+				unit: '',
+			};
+	}
+}
+
+/**
  * @param {string} [moduleId]
  * @returns {WamExampleTemplateSynthConstructor}
  */

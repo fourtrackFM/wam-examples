@@ -1,0 +1,18 @@
+﻿node : 
+file:///C:/Users/acous/Documents/GitHub/wam-examples/packages/wam-soundfont/src/WamSoundFontSynth.js:477
+At line:1 char:90
++ ... les\packages\wam-soundfont"; node test/sf2-debug.test.js 2>&1 | Out-F ...
++                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (file:///C:/User...ontSynth.js:477:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+export function getGeneratorNames() {
+       ^
+
+SyntaxError: Identifier 'getGeneratorNames' has already been declared
+    at compileSourceTextModule (node:internal/modules/esm/utils:338:16)
+    at ModuleLoader.moduleStrategy (node:internal/modules/esm/translators:102:18)
+    at #translate (node:internal/modules/esm/loader:437:12)
+    at ModuleLoader.loadAndTranslate (node:internal/modules/esm/loader:484:27)
+
+Node.js v22.12.0
