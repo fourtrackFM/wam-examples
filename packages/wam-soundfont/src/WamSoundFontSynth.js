@@ -13,7 +13,212 @@
 /** @typedef {import('../../sdk').WamParameterInterpolatorMap} WamParameterInterpolatorMap */
 /** @typedef {import('./types').WamExampleTemplateModuleScope} WamExampleTemplateModuleScope */
 /** @typedef {import('./types').WamExampleTemplateSynth} IWamExampleTemplateSynth */
-/** @typedef {typeof import('./types').WamExampleTemplateSynth} WamExampleTemplateSynthConstructor */
+/** @typedef {import('./types').WamExampleTemplateSynth} WamExampleTemplateSynthConstructor */
+
+// ============================================================================
+// STANDALONE SF2 PARSING FUNCTIONS (can be used outside worklet context)
+// ============================================================================
+
+/**
+ * Parse SF2 file and extract complete hydra structure for debugging
+ * @param {ArrayBuffer} arrayBuffer
+ * @returns {Object} Complete hydra structure with all chunks
+ */
+export function parseCompleteSF2Structure(arrayBuffer) {
+	const dataView = new DataView(arrayBuffer);
+	let offset = 0;
+
+	const readString = (length) => {
+		const chars = [];
+		for (let i = 0; i < length; i++) {
+			const char = dataView.getUint8(offset + i);
+			if (char === 0) break;
+			chars.push(char);
+		}
+		offset += length; // Always advance by full length
+		return String.fromCharCode(...chars);
+	};
+
+	const readDWord = () => {
+		const val = dataView.getUint32(offset, true);
+		offset += 4;
+		return val;
+	};
+
+	const readWord = () => {
+		const val = dataView.getUint16(offset, true);
+		offset += 2;
+		return val;
+	};
+
+	const readByte = () => dataView.getUint8(offset++);
+	const readChar = () => dataView.getInt8(offset++);
+
+	// Skip RIFF header
+	offset = 12;
+
+	let pdtaOffset = null;
+
+	// Find pdta chunk
+	while (offset < arrayBuffer.byteLength - 8) {
+		const chunkId = readString(4);
+		const chunkSize = readDWord();
+		const chunkStart = offset;
+
+		if (chunkId === 'LIST') {
+			const listType = readString(4);
+			if (listType === 'pdta') pdtaOffset = chunkStart;
+		}
+
+		offset = chunkStart + chunkSize;
+	}
+
+	const hydra = {
+		presetHeaders: [],
+		presetBags: [],
+		presetMods: [],
+		presetGens: [],
+		instruments: [],
+		instrumentBags: [],
+		instrumentMods: [],
+		instrumentGens: [],
+		sampleHeaders: [],
+	};
+
+	if (pdtaOffset) {
+		offset = pdtaOffset + 4;
+		const pdtaSize = dataView.getUint32(pdtaOffset - 4, true);
+		const endOffset = offset + pdtaSize - 4;
+
+		while (offset < endOffset - 8) {
+			const subChunkId = readString(4);
+			const subChunkSize = readDWord();
+			const subChunkStart = offset;
+
+			if (subChunkId === 'phdr') {
+				const count = Math.floor(subChunkSize / 38);
+				for (let i = 0; i < count; i++) {
+					hydra.presetHeaders.push({
+						name: readString(20),
+						preset: readWord(),
+						bank: readWord(),
+						bagIndex: readWord(),
+						library: readDWord(),
+						genre: readDWord(),
+						morphology: readDWord(),
+					});
+				}
+			} else if (subChunkId === 'pbag') {
+				const count = Math.floor(subChunkSize / 4);
+				for (let i = 0; i < count; i++) {
+					hydra.presetBags.push({
+						genIndex: readWord(),
+						modIndex: readWord(),
+					});
+				}
+			} else if (subChunkId === 'pmod') {
+				const count = Math.floor(subChunkSize / 10);
+				for (let i = 0; i < count; i++) {
+					const srcOper = readWord();
+					const destOper = readWord();
+					const amount = dataView.getInt16(offset, true);
+					offset += 2;
+					const amtSrcOper = readWord();
+					const transOper = readWord();
+					hydra.presetMods.push({
+						srcOper,
+						destOper,
+						amount,
+						amtSrcOper,
+						transOper,
+					});
+				}
+			} else if (subChunkId === 'pgen') {
+				const count = Math.floor(subChunkSize / 4);
+				for (let i = 0; i < count; i++) {
+					hydra.presetGens.push({
+						oper: readWord(),
+						amount: readWord(),
+					});
+				}
+			} else if (subChunkId === 'inst') {
+				const count = Math.floor(subChunkSize / 22);
+				for (let i = 0; i < count; i++) {
+					hydra.instruments.push({
+						name: readString(20),
+						bagIndex: readWord(),
+					});
+				}
+			} else if (subChunkId === 'ibag') {
+				const count = Math.floor(subChunkSize / 4);
+				for (let i = 0; i < count; i++) {
+					hydra.instrumentBags.push({
+						genIndex: readWord(),
+						modIndex: readWord(),
+					});
+				}
+			} else if (subChunkId === 'imod') {
+				const count = Math.floor(subChunkSize / 10);
+				for (let i = 0; i < count; i++) {
+					const srcOper = readWord();
+					const destOper = readWord();
+					const amount = dataView.getInt16(offset, true);
+					offset += 2;
+					const amtSrcOper = readWord();
+					const transOper = readWord();
+					hydra.instrumentMods.push({
+						srcOper,
+						destOper,
+						amount,
+						amtSrcOper,
+						transOper,
+					});
+				}
+			} else if (subChunkId === 'igen') {
+				const count = Math.floor(subChunkSize / 4);
+				for (let i = 0; i < count; i++) {
+					hydra.instrumentGens.push({
+						oper: readWord(),
+						amount: readWord(),
+					});
+				}
+			} else if (subChunkId === 'shdr') {
+				const count = Math.floor(subChunkSize / 46);
+				for (let i = 0; i < count; i++) {
+					const name = readString(20);
+					const start = readDWord();
+					const end = readDWord();
+					const loopStart = readDWord();
+					const loopEnd = readDWord();
+					const sampleRate = readDWord();
+					const originalPitch = readByte();
+					const pitchCorrection = readChar();
+					const sampleLink = readWord();
+					const sampleType = readWord();
+
+					if (sampleType !== 0x8000) {
+						hydra.sampleHeaders.push({
+							name,
+							start,
+							end,
+							loopStart,
+							loopEnd,
+							sampleRate,
+							originalPitch,
+							pitchCorrection,
+							sampleLink,
+							sampleType,
+						});
+					}
+				}
+			}
+
+			offset = subChunkStart + subChunkSize;
+		}
+	}
+
+	return hydra;
+}
 
 /**
  * @param {string} [moduleId]
@@ -410,207 +615,6 @@ const getWamExampleTemplateSynth = (moduleId) => {
 
 		console.log('[Synth] Parsed', allPrograms.length, 'programs');
 		return allPrograms;
-	}
-
-	/**
-	 * Parse SF2 file and extract complete hydra structure for debugging
-	 * @param {ArrayBuffer} arrayBuffer
-	 * @returns {Object} Complete hydra structure with all chunks
-	 */
-	function parseCompleteSF2Structure(arrayBuffer) {
-		const dataView = new DataView(arrayBuffer);
-		let offset = 0;
-
-		const readString = (length) => {
-			const chars = [];
-			for (let i = 0; i < length; i++) {
-				const char = dataView.getUint8(offset++);
-				if (char === 0) break;
-				chars.push(char);
-			}
-			offset += length - chars.length;
-			return String.fromCharCode(...chars);
-		};
-
-		const readDWord = () => {
-			const val = dataView.getUint32(offset, true);
-			offset += 4;
-			return val;
-		};
-
-		const readWord = () => {
-			const val = dataView.getUint16(offset, true);
-			offset += 2;
-			return val;
-		};
-
-		const readByte = () => dataView.getUint8(offset++);
-		const readChar = () => dataView.getInt8(offset++);
-
-		// Skip RIFF header
-		offset = 12;
-
-		let pdtaOffset = null;
-
-		// Find pdta chunk
-		while (offset < arrayBuffer.byteLength - 8) {
-			const chunkId = readString(4);
-			const chunkSize = readDWord();
-			const chunkStart = offset;
-
-			if (chunkId === 'LIST') {
-				const listType = readString(4);
-				if (listType === 'pdta') pdtaOffset = chunkStart;
-			}
-
-			offset = chunkStart + chunkSize;
-		}
-
-		const hydra = {
-			presetHeaders: [],
-			presetBags: [],
-			presetMods: [],
-			presetGens: [],
-			instruments: [],
-			instrumentBags: [],
-			instrumentMods: [],
-			instrumentGens: [],
-			sampleHeaders: [],
-		};
-
-		if (pdtaOffset) {
-			offset = pdtaOffset + 4;
-			const pdtaSize = dataView.getUint32(pdtaOffset - 4, true);
-			const endOffset = offset + pdtaSize - 4;
-
-			while (offset < endOffset - 8) {
-				const subChunkId = readString(4);
-				const subChunkSize = readDWord();
-				const subChunkStart = offset;
-
-				if (subChunkId === 'phdr') {
-					const count = Math.floor(subChunkSize / 38);
-					for (let i = 0; i < count; i++) {
-						hydra.presetHeaders.push({
-							name: readString(20),
-							preset: readWord(),
-							bank: readWord(),
-							bagIndex: readWord(),
-							library: readDWord(),
-							genre: readDWord(),
-							morphology: readDWord(),
-						});
-					}
-				} else if (subChunkId === 'pbag') {
-					const count = Math.floor(subChunkSize / 4);
-					for (let i = 0; i < count; i++) {
-						hydra.presetBags.push({
-							genIndex: readWord(),
-							modIndex: readWord(),
-						});
-					}
-				} else if (subChunkId === 'pmod') {
-					const count = Math.floor(subChunkSize / 10);
-					for (let i = 0; i < count; i++) {
-						const srcOper = readWord();
-						const destOper = readWord();
-						const amount = dataView.getInt16(offset, true);
-						offset += 2;
-						const amtSrcOper = readWord();
-						const transOper = readWord();
-						hydra.presetMods.push({
-							srcOper,
-							destOper,
-							amount,
-							amtSrcOper,
-							transOper,
-						});
-					}
-				} else if (subChunkId === 'pgen') {
-					const count = Math.floor(subChunkSize / 4);
-					for (let i = 0; i < count; i++) {
-						hydra.presetGens.push({
-							oper: readWord(),
-							amount: readWord(),
-						});
-					}
-				} else if (subChunkId === 'inst') {
-					const count = Math.floor(subChunkSize / 22);
-					for (let i = 0; i < count; i++) {
-						hydra.instruments.push({
-							name: readString(20),
-							bagIndex: readWord(),
-						});
-					}
-				} else if (subChunkId === 'ibag') {
-					const count = Math.floor(subChunkSize / 4);
-					for (let i = 0; i < count; i++) {
-						hydra.instrumentBags.push({
-							genIndex: readWord(),
-							modIndex: readWord(),
-						});
-					}
-				} else if (subChunkId === 'imod') {
-					const count = Math.floor(subChunkSize / 10);
-					for (let i = 0; i < count; i++) {
-						const srcOper = readWord();
-						const destOper = readWord();
-						const amount = dataView.getInt16(offset, true);
-						offset += 2;
-						const amtSrcOper = readWord();
-						const transOper = readWord();
-						hydra.instrumentMods.push({
-							srcOper,
-							destOper,
-							amount,
-							amtSrcOper,
-							transOper,
-						});
-					}
-				} else if (subChunkId === 'igen') {
-					const count = Math.floor(subChunkSize / 4);
-					for (let i = 0; i < count; i++) {
-						hydra.instrumentGens.push({
-							oper: readWord(),
-							amount: readWord(),
-						});
-					}
-				} else if (subChunkId === 'shdr') {
-					const count = Math.floor(subChunkSize / 46);
-					for (let i = 0; i < count; i++) {
-						const name = readString(20);
-						const start = readDWord();
-						const end = readDWord();
-						const loopStart = readDWord();
-						const loopEnd = readDWord();
-						const sampleRate = readDWord();
-						const originalPitch = readByte();
-						const pitchCorrection = readChar();
-						const sampleLink = readWord();
-						const sampleType = readWord();
-
-						if (sampleType !== 0x8000) {
-							hydra.sampleHeaders.push({
-								name,
-								start,
-								end,
-								loopStart,
-								loopEnd,
-								sampleRate,
-								originalPitch,
-								pitchCorrection,
-								sampleLink,
-								sampleType,
-							});
-						}
-					}
-				}
-
-				offset = subChunkStart + subChunkSize;
-			}
-		}
-
-		return hydra;
 	}
 
 	/**
