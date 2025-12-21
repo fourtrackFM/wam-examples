@@ -84,7 +84,7 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 		 * @returns {WamParameterInfoMap}
 		 */
 		_generateWamParameterInfo() {
-			return {
+			const params = {
 				// your plugin parameters here
 				bypass: new WamParameterInfo('bypass', {
 					type: 'boolean',
@@ -99,6 +99,43 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 					maxValue: 127,
 				}),
 			};
+
+			// Add debug info parameters as read-only strings
+			if (this._debugData) {
+				params.sf2_debug_hydra = new WamParameterInfo(
+					'sf2_debug_hydra',
+					{
+						type: 'string',
+						label: 'SF2 Hydra Structure (Debug)',
+						defaultValue: JSON.stringify(
+							this._debugData.hydra || {}
+						),
+						readOnly: true,
+					}
+				);
+				params.sf2_debug_programs = new WamParameterInfo(
+					'sf2_debug_programs',
+					{
+						type: 'string',
+						label: 'SF2 Programs Metadata (Debug)',
+						defaultValue: JSON.stringify(
+							this._debugData.programs || []
+						),
+						readOnly: true,
+					}
+				);
+				params.sf2_debug_current_program = new WamParameterInfo(
+					'sf2_debug_current_program',
+					{
+						type: 'int',
+						label: 'Current Program (Debug)',
+						defaultValue: this._debugData.currentProgram || 0,
+						readOnly: true,
+					}
+				);
+			}
+
+			return params;
 		}
 
 		/**
@@ -127,6 +164,13 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 				synthConfig
 			);
 			console.log('[Processor] Synth created with SF2 buffer');
+
+			// Store debug data for parameter generation
+			this._debugData = this._synth.getDebugData();
+
+			// Regenerate parameters to include debug data
+			this.params = this._generateWamParameterInfo();
+
 			console.log('[Processor] _initialize complete');
 		}
 
@@ -151,12 +195,27 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 				if (this._synth && newProgram !== this._currentProgram) {
 					this._currentProgram = newProgram;
 					this._synth.programChange(newProgram);
+
+					// Update debug parameter
+					if (this._debugData) {
+						this._debugData.currentProgram = newProgram;
+					}
+
 					console.log(
 						'[Processor] Program changed via automation to:',
 						newProgram
 					);
 				}
 			}
+		}
+
+		/**
+		 * Get debug data from synth
+		 * @returns {Object}
+		 */
+		getDebugData() {
+			if (!this._synth) return null;
+			return this._synth.getDebugData();
 		}
 
 		/**
@@ -183,13 +242,27 @@ const getWamExampleTemplateProcessor = (moduleId) => {
 				const newProgram = data1;
 				if (newProgram !== this._currentProgram) {
 					this._currentProgram = newProgram;
-					// Request the Node to load this program
-					// this.port.postMessage({
-					// 	type: 'requestProgramLoad',
-					// 	program: newProgram,
-					// });
+
+					// Update debug parameter
+					if (this._debugData) {
+						this._debugData.currentProgram = newProgram;
+					}
 				}
 				this._synth.programChange(newProgram);
+			}
+		}
+
+		/**
+		 * Handle messages from main thread
+		 * @param {MessageEvent} event
+		 */
+		_onMessage(event) {
+			if (event.data.type === 'getDebugData') {
+				const debugData = this.getDebugData();
+				this.port.postMessage({
+					type: 'debugDataResponse',
+					debugData,
+				});
 			}
 		}
 
