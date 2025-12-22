@@ -733,7 +733,10 @@ const getWamExampleTemplateSynth = (moduleId) => {
 
 		// Get preset zones and find instrument
 		const presetIndex = hydra.presetHeaders.indexOf(preset);
-		if (presetIndex === -1 || presetIndex >= hydra.presetHeaders.length - 1) {
+		if (
+			presetIndex === -1 ||
+			presetIndex >= hydra.presetHeaders.length - 1
+		) {
 			throw new Error('Invalid preset index');
 		}
 
@@ -744,6 +747,22 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		);
 
 		let instrumentId = null;
+
+		// Initialize generators with SF2 spec defaults (section 8.1.2)
+		// Generators can be at both preset and instrument level
+		const generators = {
+			delayVolEnv: -12000, // 0.001 seconds
+			attackVolEnv: -12000, // 0.001 seconds
+			holdVolEnv: -12000, // 0.001 seconds
+			decayVolEnv: -12000, // 0.001 seconds
+			sustainVolEnv: 0, // 0 centibels = full volume
+			releaseVolEnv: -12000, // 0.001 seconds
+			initialAttenuation: 0, // 0 centibels = no attenuation
+			coarseTune: 0, // 0 semitones
+			fineTune: 0, // 0 cents
+		};
+
+		// First, extract generators from PRESET zones (these are global for the preset)
 		for (const bag of presetBags) {
 			const nextGenIndex =
 				presetBags.indexOf(bag) + 1 < presetBags.length
@@ -756,7 +775,41 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			);
 			if (instGen) {
 				instrumentId = instGen.amount;
-				break;
+
+				// Extract preset-level generators (before we break)
+				// Convert unsigned 16-bit to signed 16-bit for envelope timecents
+				for (const gen of gens) {
+					const signedAmount = gen.amount > 32767 ? gen.amount - 65536 : gen.amount;
+					switch (gen.oper) {
+						case 33:
+							generators.delayVolEnv = signedAmount;
+							break;
+						case 34:
+							generators.attackVolEnv = signedAmount;
+							break;
+						case 35:
+							generators.holdVolEnv = signedAmount;
+							break;
+						case 36:
+							generators.decayVolEnv = signedAmount;
+							break;
+						case 37:
+							generators.sustainVolEnv = gen.amount;
+							break;
+						case 38:
+							generators.releaseVolEnv = signedAmount;
+							break;
+						case 48:
+							generators.initialAttenuation = gen.amount;
+							break;
+						case 51:
+							generators.coarseTune = signedAmount;
+							break;
+						case 52:
+							generators.fineTune = signedAmount;
+							break;
+					}
+				}
 			}
 		}
 
@@ -781,20 +834,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		let velRange = { lo: 0, hi: 127 };
 		let overrideRootKey = null;
 
-		// Initialize generators with SF2 spec defaults (section 8.1.2)
-		// Must be in outer scope so it's accessible in return statement
-		const generators = {
-			delayVolEnv: -12000, // 0.001 seconds
-			attackVolEnv: -12000, // 0.001 seconds
-			holdVolEnv: -12000, // 0.001 seconds
-			decayVolEnv: -12000, // 0.001 seconds
-			sustainVolEnv: 0, // 0 centibels = full volume
-			releaseVolEnv: -12000, // 0.001 seconds
-			initialAttenuation: 0, // 0 centibels = no attenuation
-			coarseTune: 0, // 0 semitones
-			fineTune: 0, // 0 cents
-		};
-
+		// Now process instrument zones (instrument generators override preset generators)
 		for (const bag of instrumentBags) {
 			const nextGenIndex =
 				instrumentBags.indexOf(bag) + 1 < instrumentBags.length
@@ -833,43 +873,47 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				);
 				if (rootKeyGen) overrideRootKey = rootKeyGen.amount;
 
-				// Override with actual generator values from SF2
+				// Override with instrument-level generator values (these override preset values)
+				// Convert unsigned 16-bit to signed 16-bit for envelope timecents
 				for (const gen of gens) {
+					const signedAmount =
+						gen.amount > 32767 ? gen.amount - 65536 : gen.amount;
 					switch (gen.oper) {
-						case 33: // delayVolEnv
-							generators.delayVolEnv = gen.amount;
+						case 33:
+							generators.delayVolEnv = signedAmount;
 							break;
-						case 34: // attackVolEnv
-							generators.attackVolEnv = gen.amount;
+						case 34:
+							generators.attackVolEnv = signedAmount;
 							break;
-						case 35: // holdVolEnv
-							generators.holdVolEnv = gen.amount;
+						case 35:
+							generators.holdVolEnv = signedAmount;
 							break;
-						case 36: // decayVolEnv
-							generators.decayVolEnv = gen.amount;
+						case 36:
+							generators.decayVolEnv = signedAmount;
 							break;
-						case 37: // sustainVolEnv (in centibels)
+						case 37:
 							generators.sustainVolEnv = gen.amount;
+							break; // sustain is unsigned
+						case 38:
+							generators.releaseVolEnv = signedAmount;
 							break;
-						case 38: // releaseVolEnv
-							generators.releaseVolEnv = gen.amount;
-							break;
-						case 48: // initialAttenuation (in centibels)
+						case 48:
 							generators.initialAttenuation = gen.amount;
+							break; // attenuation is unsigned
+						case 51:
+							generators.coarseTune = signedAmount;
 							break;
-						case 51: // coarseTune (in semitones)
-							generators.coarseTune = gen.amount;
+						case 52:
+							generators.fineTune = signedAmount;
 							break;
-						case 52: // fineTune (in cents)
-							generators.fineTune = gen.amount;
-							break;
-						// Add more generators as needed (filter, LFO, etc.)
 					}
 				}
 
 				break;
 			}
 		}
+
+		console.log('[parseSF2] Final generators:', generators);
 
 		if (sampleId === null || sampleId >= hydra.sampleHeaders.length) {
 			throw new Error('No valid sample found');
@@ -882,6 +926,20 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		const relativeLoopStart = sample.loopStart - sample.start;
 		const relativeLoopEnd = sample.loopEnd - sample.start;
 
+		console.log('[parseSF2] Sample info:', {
+			sampleId,
+			sampleName: sample.name,
+			absoluteLoopStart: sample.loopStart,
+			absoluteLoopEnd: sample.loopEnd,
+			sampleStart: sample.start,
+			sampleEnd: sample.end,
+			relativeLoopStart,
+			relativeLoopEnd,
+			sampleDataLength: sampleData.length,
+			generators: generators,
+			hasGenerators: !!generators,
+		});
+
 		return {
 			sampleData,
 			selectedSample: {
@@ -889,7 +947,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				rootKey: overrideRootKey || sample.originalPitch,
 				keyRange,
 				velRange,
-				// Use relative loop points
+				// Use relative loop points - these should override the spread
 				loopStart: relativeLoopStart,
 				loopEnd: relativeLoopEnd,
 				generators, // Include extracted generator values
@@ -912,16 +970,20 @@ const getWamExampleTemplateSynth = (moduleId) => {
 
 		// First, get the hydra structure to see what presets actually exist
 		const hydra = parseCompleteSF2Structure(arrayBuffer);
-		
+
 		// Iterate through actual presets in the file (excluding terminator)
 		for (let i = 0; i < hydra.presetHeaders.length - 1; i++) {
 			const preset = hydra.presetHeaders[i];
-			
+
 			// Only parse presets from the requested bank
 			if (preset.bank !== bankNumber) continue;
-			
+
 			try {
-				const programData = parseSF2(arrayBuffer, preset.preset, preset.bank);
+				const programData = parseSF2(
+					arrayBuffer,
+					preset.preset,
+					preset.bank
+				);
 				if (programData && programData.sampleData) {
 					allPrograms.push(programData);
 				}
@@ -933,7 +995,12 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			}
 		}
 
-		console.log('[Synth] Successfully parsed', allPrograms.length, 'programs from bank', bankNumber);
+		console.log(
+			'[Synth] Successfully parsed',
+			allPrograms.length,
+			'programs from bank',
+			bankNumber
+		);
 		return allPrograms;
 	}
 
@@ -1192,6 +1259,15 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				metadata.loopEnd || (sampleData ? sampleData.length : 0);
 			this._sampleDataSampleRate = metadata.sampleRate || 44100;
 
+			console.log('[Part] setSampleData:', {
+				rootKey: this._rootKey,
+				loopStart: this._loopStart,
+				loopEnd: this._loopEnd,
+				sampleLength: sampleData ? sampleData.length : 0,
+				hasGenerators: !!metadata.generators,
+				generators: metadata.generators,
+			});
+
 			// SF2 spec defaults if no generators provided (section 8.1.2)
 			const g = metadata.generators || {
 				delayVolEnv: -12000,
@@ -1210,16 +1286,25 @@ const getWamExampleTemplateSynth = (moduleId) => {
 
 			// Volume Envelope - always apply (use defaults if not specified)
 			this._delayTime = timecentsToSeconds(g.delayVolEnv);
-			this._attackTime = Math.max(0.001, timecentsToSeconds(g.attackVolEnv));
+			this._attackTime = Math.max(
+				0.001,
+				timecentsToSeconds(g.attackVolEnv)
+			);
 			this._holdTime = timecentsToSeconds(g.holdVolEnv);
-			this._decayTime = Math.max(0.001, timecentsToSeconds(g.decayVolEnv));
-			
+			this._decayTime = Math.max(
+				0.001,
+				timecentsToSeconds(g.decayVolEnv)
+			);
+
 			// sustainVolEnv is in centibels of attenuation (0-1000+)
 			// Convert to linear gain: gain = 10^(-attenuation/200)
 			const attenuationCB = Math.max(0, Math.min(1440, g.sustainVolEnv));
 			this._sustainLevel = Math.pow(10, -attenuationCB / 200.0);
-			
-			this._releaseTime = Math.max(0.001, timecentsToSeconds(g.releaseVolEnv));
+
+			this._releaseTime = Math.max(
+				0.001,
+				timecentsToSeconds(g.releaseVolEnv)
+			);
 
 			// Initial Attenuation (in centibels)
 			this._initialAttenuation = g.initialAttenuation / 10.0; // Convert cB to dB
@@ -1227,6 +1312,16 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			// Tuning
 			this._coarseTune = g.coarseTune;
 			this._fineTune = g.fineTune;
+
+			console.log('[Part] Envelope configured:', {
+				delay: this._delayTime,
+				attack: this._attackTime,
+				hold: this._holdTime,
+				decay: this._decayTime,
+				sustain: this._sustainLevel,
+				release: this._releaseTime,
+				initialAtten: this._initialAttenuation,
+			});
 		}
 
 		/**
@@ -1622,11 +1717,8 @@ const getWamExampleTemplateSynth = (moduleId) => {
 					if (programData && programData.sampleData) {
 						this._programMap.set(programData.program, {
 							sampleData: programData.sampleData,
-							metadata: {
-								selectedSample: programData.selectedSample,
-								sampleRate: programData.sampleRate,
-								presetName: programData.presetName,
-							},
+							// metadata IS the selectedSample (which has all the info we need)
+							metadata: programData.selectedSample,
 						});
 
 						// Store metadata for debug access
@@ -1650,21 +1742,23 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				const program0 = this._programMap.get(0);
 				if (program0) {
 					this._sampleData = program0.sampleData;
-					const metadata = program0.metadata;
+					const metadata = program0.metadata; // metadata IS selectedSample now
 					for (let i = 0; i < this._numVoices; i++) {
 						const voice = this._voices[i];
 						voice._leftPart.setSampleData(
 							this._sampleData,
-							metadata.selectedSample
+							metadata
 						);
 						voice._rightPart.setSampleData(
 							this._sampleData,
-							metadata.selectedSample
+							metadata
 						);
 					}
 					console.log(
-						'[Synth] Initial program 0 loaded:',
-						metadata.presetName
+						'[Synth] Initial program 0 loaded, loop:',
+						metadata.loopStart,
+						'-',
+						metadata.loopEnd
 					);
 				}
 			}
@@ -1732,6 +1826,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 */
 		loadSoundFontData(data) {
 			console.log('[Synth] Loading SoundFont data', data);
+			console.log('[Synth] selectedSample:', data.selectedSample);
 
 			// Store program data with full selectedSample metadata
 			const program = data.program || 0;
