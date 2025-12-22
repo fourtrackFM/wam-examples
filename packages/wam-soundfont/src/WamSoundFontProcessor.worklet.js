@@ -28,6 +28,13 @@ const getWamSoundFontProcessor = (moduleId) => {
 			console.log('[WamSoundFontProcessor] super() completed');
 			this._ready = false;
 			this._soundFontLoaded = false;
+
+			// Store the soundfont buffer from processorOptions
+			this._sf2Buffer = options.processorOptions?.sf2Buffer;
+			console.log(
+				'[WamSoundFontProcessor] sf2Buffer received:',
+				!!this._sf2Buffer
+			);
 		}
 
 		_initialize() {
@@ -42,7 +49,20 @@ const getWamSoundFontProcessor = (moduleId) => {
 				console.log(
 					'[WamSoundFontProcessor] Creating SpessaSynthProcessor...'
 				);
-				this._synthesizer = new SpessaSynthProcessor(44100); // this.samplerate raises NaN
+				this._synthesizer = new SpessaSynthProcessor(44100); // this.sampleRate
+
+				// Load the soundfont if it was provided
+				if (this._sf2Buffer) {
+					console.log(
+						'[WamSoundFontProcessor] Loading soundfont from constructor options...'
+					);
+					this._loadSoundFont(this._sf2Buffer);
+				} else {
+					console.log(
+						'[WamSoundFontProcessor] No soundfont provided in options'
+					);
+				}
+
 				console.log(
 					'[WamSoundFontProcessor] SpessaSynthProcessor created'
 				);
@@ -57,20 +77,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 			}
 		}
 
-		/**
-		 * Handle incoming messages from the main thread
-		 */
-		_onMessage(e) {
-			console.log('[WamSoundFontProcessor] _onMessage received:', e);
-
-			if (e.request === 'loadSoundFont') {
-				this._handleLoadSoundFont(e.content);
-			} else {
-				super._onMessage(e);
-			}
-		}
-
-		async _handleLoadSoundFont(arrayBuffer) {
+		_loadSoundFont(arrayBuffer) {
 			try {
 				console.log(
 					'[WamSoundFontProcessor] Loading SoundFont, size:',
@@ -78,30 +85,51 @@ const getWamSoundFontProcessor = (moduleId) => {
 				);
 
 				const soundBank = SoundBankLoader.fromArrayBuffer(arrayBuffer);
-				await this._synthesizer.soundBankManager.addSoundBank(
-					soundBank
-				);
+				this._synthesizer.soundBankManager.addSoundBank(soundBank);
 				this._soundFontLoaded = true;
 
 				console.log(
 					'[WamSoundFontProcessor] SoundFont loaded successfully'
 				);
-
-				this.port.postMessage({
-					type: 'soundFontLoaded',
-					success: true,
-				});
 			} catch (error) {
 				console.error(
 					'[WamSoundFontProcessor] Error loading SoundFont:',
 					error
 				);
-				this.port.postMessage({
-					type: 'soundFontLoaded',
-					success: false,
-					error: error.message,
-				});
 			}
+		}
+
+		/**
+		 * Handle incoming messages from the main thread
+		 */
+		_onSysex(sysexData) {
+			console.log(
+				'[WamSoundFontProcessor] _onMessage received:',
+				sysexData
+			);
+
+			try {
+				this._handleLoadSoundFont(sysexData.data.bytes);
+				return { success: true };
+			} catch (error) {
+				console.error('[WamSoundFontProcessor] Load error:', error);
+				return { success: false, error: error.message };
+			}
+		}
+
+		async _handleLoadSoundFont(arrayBuffer) {
+			console.log(
+				'[WamSoundFontProcessor] Loading SoundFont, size:',
+				arrayBuffer.byteLength
+			);
+
+			const soundBank = SoundBankLoader.fromArrayBuffer(arrayBuffer);
+			await this._synthesizer.soundBankManager.addSoundBank(soundBank);
+			this._soundFontLoaded = true;
+
+			console.log(
+				'[WamSoundFontProcessor] SoundFont loaded successfully'
+			);
 		}
 
 		/**
@@ -109,6 +137,17 @@ const getWamSoundFontProcessor = (moduleId) => {
 		 * @param {WamMidiData} midiData
 		 */
 		_onMidi(midiData) {
+			if (this._synthesizer) {
+				console.log(
+					'[WamSoundFontProcessor] _onMidi received:',
+					midiData
+				);
+				console.log(
+					'[WamSoundFontProcessor] Synthesizer state:',
+					this._synthesizer
+				);
+			}
+
 			if (!this._synthesizer || !this._soundFontLoaded) {
 				console.warn(
 					'[WamSoundFontProcessor] Synth not ready for MIDI'

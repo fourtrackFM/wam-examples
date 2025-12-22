@@ -86,7 +86,10 @@ export default class WamSoundFontNode extends WamNode {
 		options.numberOfInputs = 1;
 		options.numberOfOutputs = 1;
 		options.outputChannelCount = [2];
-		options.processorOptions = { useSab: true };
+		options.processorOptions = {
+			useSab: true,
+			...options.processorOptions, // Preserve sf2Buffer and other options
+		};
 		console.log(
 			'[WamSoundFontNode] Calling super() with processed options:',
 			options
@@ -95,7 +98,11 @@ export default class WamSoundFontNode extends WamNode {
 		console.log('[WamSoundFontNode] super() completed');
 
 		/** @type {Set<WamEventType>} */
-		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
+		this._supportedEventTypes = new Set([
+			'wam-automation',
+			'wam-midi',
+			'wam-sysex',
+		]);
 
 		/** @private @type {WamExampleTemplateHTMLElement} */
 		this._gui = null;

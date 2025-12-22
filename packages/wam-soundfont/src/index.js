@@ -53,35 +53,8 @@ export default class WamExampleTemplatePlugin extends WebAudioModule {
 			'[Plugin] createAudioNode() called with initialState:',
 			initialState
 		);
-		try {
-			// Load bundled synth and processor
-			console.log('[Plugin] Calling WamSoundFontNode.addModules()...');
-			await WamSoundFontNode.addModules(
-				this.audioContext,
-				this.moduleId,
-				this._baseUrl
-			);
-			console.log('[Plugin] addModules() completed');
-		} catch (err) {
-			console.error('[Plugin] addModules() failed:', err);
-			throw err;
-		}
 
-		// Create the audio node
-		console.log('[Plugin] Creating WamSoundFontNode...');
-		const wamSoundFontNode = new WamSoundFontNode(this, {});
-		console.log(
-			'[Plugin] WamSoundFontNode created, calling _initialize()...'
-		);
-		try {
-			await wamSoundFontNode._initialize();
-			console.log('[Plugin] WamSoundFontNode._initialize() completed');
-		} catch (err) {
-			console.error('[Plugin] Failed to initialize node:', err);
-			throw err;
-		}
-
-		// Load SoundFont file after initialization
+		// Load SoundFont file first
 		console.log('[Plugin] Loading SoundFont...');
 		const soundfontUrl = 'https://static.fourtrack.fm/GeneralUser-GS.sf2';
 
@@ -93,17 +66,37 @@ export default class WamExampleTemplatePlugin extends WebAudioModule {
 				arrayBuffer.byteLength
 			);
 
-			// Send soundfont to processor
-			// todo: how to hook this up properly?
-			// await wamExampleTemplateNode.loadSoundFont(arrayBuffer);
-		} catch (error) {
-			console.error('[Plugin] Failed to load SoundFont:', error);
+			// Load bundled synth and processor
+			console.log('[Plugin] Calling WamSoundFontNode.addModules()...');
+			await WamSoundFontNode.addModules(
+				this.audioContext,
+				this.moduleId,
+				this._baseUrl
+			);
+			console.log('[Plugin] addModules() completed');
+
+			// Create the audio node with soundfont in processorOptions
+			console.log('[Plugin] Creating WamSoundFontNode...');
+			const wamSoundFontNode = new WamSoundFontNode(this, {
+				processorOptions: {
+					sf2Buffer: arrayBuffer,
+				},
+			});
+
+			console.log(
+				'[Plugin] WamSoundFontNode created, calling _initialize()...'
+			);
+			await wamSoundFontNode._initialize();
+			console.log('[Plugin] WamSoundFontNode._initialize() completed');
+
+			// Set initial state if applicable
+			if (initialState) wamSoundFontNode.setState(initialState);
+
+			return wamSoundFontNode;
+		} catch (err) {
+			console.error('[Plugin] Failed to create audio node:', err);
+			throw err;
 		}
-
-		// Set initial state if applicable
-		if (initialState) wamSoundFontNode.setState(initialState);
-
-		return wamSoundFontNode;
 	}
 
 	createGui() {
