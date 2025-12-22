@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAM SoundFont Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #1e1e1e;
+            color: #d4d4d4;
+        }
+        .log {
+            background: #252526;
+            border: 1px solid #3e3e42;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .error {
+            color: #f48771;
+            background: #3f1f1f;
+        }
+        .success {
+            color: #4ec9b0;
+            background: #1f3f2f;
+        }
+        .info {
+            color: #9cdcfe;
+        }
+        button {
+            background: #0e639c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #1177bb;
+        }
+    </style>
+</head>
+<body>
+    <h1>WAM SoundFont Loading Test</h1>
+    <button id="testBtn">Run Test</button>
+    <div id="output"></div>
+
+    <script type="module">
+        const output = document.getElementById('output');
+        
+        function log(message, type = 'info') {
+            const div = document.createElement('div');
+            div.className = `log ${type}`;
+            div.textContent = message;
+            output.appendChild(div);
+            console.log(message);
+        }
+
+        async function runTest() {
+            output.innerHTML = '';
+            log('Starting WAM SoundFont test...', 'info');
+            
+            try {
+                // Step 1: Create AudioContext
+                log('Creating AudioContext...', 'info');
+                const audioContext = new AudioContext();
+                log('✓ AudioContext created', 'success');
+                
+                // Step 2: Initialize WAM
+                log('Initializing WAM...', 'info');
+                const { default: initializeWamHost } = await import('../host/index.js');
+                const [hostGroupId] = await initializeWamHost(audioContext);
+                log(`✓ WAM Host initialized (groupId: ${hostGroupId})`, 'success');
+                
+                // Step 3: Import WAM
+                log('Importing WAM module...', 'info');
+                const { default: WAM } = await import('./dist/index.js');
+                log('✓ WAM module imported', 'success');
+                
+                // Step 4: Create WAM instance
+                log('Creating WAM instance...', 'info');
+                const wamInstance = await WAM.createInstance(hostGroupId, audioContext, {
+                    baseUrl: './dist/'
+                });
+                log('✓ WAM instance created', 'success');
+                log(`  - Instance ID: ${wamInstance.instanceId}`, 'info');
+                log(`  - Module ID: ${wamInstance.moduleId}`, 'info');
+                
+                // Step 5: Connect to audio graph
+                log('Connecting to audio graph...', 'info');
+                await wamInstance.audioNode.connect(audioContext.destination);
+                log('✓ Connected to destination', 'success');
+                
+                // Step 6: Check processor is loaded
+                log('Checking processor...', 'info');
+                const processor = wamInstance.audioNode.port;
+                if (processor) {
+                    log('✓ Processor port accessible', 'success');
+                } else {
+                    throw new Error('Processor port not accessible');
+                }
+                
+                // Step 7: Test parameter access
+                log('Checking parameters...', 'info');
+                const params = await wamInstance.audioNode.getParameterInfo();
+                log(`✓ Found ${Object.keys(params).length} parameters`, 'success');
+                
+                log('', 'info');
+                log('========================================', 'success');
+                log('ALL TESTS PASSED ✓', 'success');
+                log('========================================', 'success');
+                log('', 'info');
+                log('The WAM loaded successfully without errors!', 'success');
+                
+            } catch (error) {
+                log('', 'info');
+                log('========================================', 'error');
+                log('TEST FAILED ✗', 'error');
+                log('========================================', 'error');
+                log('', 'info');
+                log(`Error: ${error.message}`, 'error');
+                log('', 'info');
+                log('Stack trace:', 'error');
+                log(error.stack, 'error');
+                
+                // Log additional context if available
+                if (error.cause) {
+                    log('', 'info');
+                    log('Caused by:', 'error');
+                    log(error.cause, 'error');
+                }
+            }
+        }
+
+        document.getElementById('testBtn').addEventListener('click', runTest);
+        
+        // Auto-run on load
+        log('Test ready. Click "Run Test" or it will auto-run in 1 second...', 'info');
+        setTimeout(runTest, 1000);
+    </script>
+</body>
+</html>

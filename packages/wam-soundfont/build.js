@@ -15,27 +15,55 @@ fs.mkdirSync(distDir, { recursive: true });
 
 console.log('Building WamSoundFont plugin...');
 
-// Bundle WamSoundFontProcessor.js (includes WamSoundFontSynth with spessasynth_core)
+// Bundle spessasynth_core to src/ directory
 try {
 	await build({
-		entryPoints: [path.join(__dirname, 'src', 'WamSoundFontProcessor.js')],
+		entryPoints: ['spessasynth_core'],
 		bundle: true,
 		format: 'esm',
 		platform: 'browser',
 		target: 'es2020',
-		outfile: path.join(distDir, 'WamSoundFontProcessor.js'),
+		outfile: path.join(__dirname, 'src', 'spessasynth_core.js'),
 		sourcemap: false,
 		minify: false,
-		external: [], // Bundle everything including spessasynth_core
 	});
-	console.log('✓ WamSoundFontProcessor.js bundled successfully');
+	console.log('✓ spessasynth_core.js bundled to src/');
 } catch (error) {
-	console.error('✗ Processor build failed:', error);
+	console.error('✗ spessasynth_core build failed:', error);
+	process.exit(1);
+}
+
+// Bundle WamSoundFontSynth.js to be loaded by fetchModule
+// This needs to create window.module.exports compatible output
+try {
+	const result = await build({
+		entryPoints: [path.join(__dirname, 'src', 'WamSoundFontSynth.js')],
+		bundle: true,
+		format: 'esm',
+		platform: 'browser',
+		target: 'es2020',
+		write: false,
+		sourcemap: false,
+		minify: false,
+		external: [], // Bundle everything now that spessasynth_core is local
+	});
+
+	let code = result.outputFiles[0].text;
+	fs.writeFileSync(path.join(distDir, 'WamSoundFontSynth.js'), code);
+	console.log('✓ WamSoundFontSynth.js bundled successfully');
+} catch (error) {
+	console.error('✗ Synth build failed:', error);
 	process.exit(1);
 }
 
 // Copy other source files that don't need bundling
-const filesToCopy = ['index.js', 'WamSoundFontNode.js', 'descriptor.json'];
+const filesToCopy = [
+	'index.js',
+	'WamSoundFontNode.js',
+	'WamSoundFontProcessor.js',
+	'descriptor.json',
+	'spessasynth_core.js', // Copy the bundled spessasynth_core
+];
 
 for (const file of filesToCopy) {
 	const srcPath = path.join(__dirname, 'src', file);

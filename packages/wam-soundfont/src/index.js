@@ -3,7 +3,7 @@
 // SDK
 import WebAudioModule from '../../sdk/src/WebAudioModule.js';
 // DSP
-import WamExampleTemplateNode from './WamSoundFontNode.js';
+import WamSoundFontNode from './WamSoundFontNode.js';
 // GUI
 import { createElement } from './Gui/index.js';
 
@@ -33,17 +33,16 @@ export default class WamExampleTemplatePlugin extends WebAudioModule {
 	}
 
 	async createAudioNode(initialState) {
-		// Load the bundled processor (includes spessasynth_core)
-		const processorUrl = `${this._baseUrl}/WamSoundFontProcessor.js`;
-		await WamExampleTemplateNode.addModules(
+		// Load bundled synth and processor
+		await WamSoundFontNode.addModules(
 			this.audioContext,
 			this.moduleId,
-			processorUrl
+			this._baseUrl
 		);
 
 		// Create the audio node
-		const wamExampleTemplateNode = new WamExampleTemplateNode(this, {});
-		await wamExampleTemplateNode._initialize();
+		const wamSoundFontNode = new WamSoundFontNode(this, {});
+		await wamSoundFontNode._initialize();
 
 		// Load SoundFont file after initialization
 		console.log('[Plugin] Loading SoundFont...');

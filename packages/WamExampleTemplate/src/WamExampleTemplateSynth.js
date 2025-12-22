@@ -19,20 +19,22 @@
  * @param {string} [moduleId]
  * @returns {WamExampleTemplateSynthConstructor}
  */
- const getWamExampleTemplateSynth = (moduleId) => {
-
+export const getWamExampleTemplateSynth = (moduleId) => {
 	/** @type {AudioWorkletGlobalScope} */
 	// @ts-ignore
 	const audioWorkletGlobalScope = globalThis;
 
 	/** @type {WamExampleTemplateModuleScope} */
-	const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+	const ModuleScope =
+		audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 	const { WamParameterInfo } = ModuleScope;
 
 	/**
 	 * @param {number} note
 	 */
-	function noteToHz(note) { return 2.0 ** ((note - 69) / 12.0) * 440.0; }
+	function noteToHz(note) {
+		return 2.0 ** ((note - 69) / 12.0) * 440.0;
+	}
 
 	/**
 	 * Template for synth part (mono output)
@@ -138,25 +140,41 @@
 			this._deactivating = 0;
 
 			/** @private @type {WamExampleTemplateSynthPart} part for rendering left channel */
-			this._leftPart = new WamExampleTemplateSynthPart(samplesPerQuantum, sampleRate);
+			this._leftPart = new WamExampleTemplateSynthPart(
+				samplesPerQuantum,
+				sampleRate
+			);
 
 			/** @private @type {WamExampleTemplateSynthPart} part for rendering right channel */
-			this._rightPart = new WamExampleTemplateSynthPart(samplesPerQuantum, sampleRate);
+			this._rightPart = new WamExampleTemplateSynthPart(
+				samplesPerQuantum,
+				sampleRate
+			);
 		}
 
 		// read-only properties
-		get channel() { return this._channel; }
-		get note() { return this._note; }
-		get velocity() { return this._velocity; }
-		get timestamp() { return this._timestamp; }
-		get active() { return this._active; }
+		get channel() {
+			return this._channel;
+		}
+		get note() {
+			return this._note;
+		}
+		get velocity() {
+			return this._velocity;
+		}
+		get timestamp() {
+			return this._timestamp;
+		}
+		get active() {
+			return this._active;
+		}
 
 		/**
 		 * Check if the voice is on the channel and note
 		 * @param {number} channel MIDI channel number
 		 * @param {number} note MIDI note number
 		 * @returns {boolean}
-		*/
+		 */
 		matches(channel, note) {
 			return this._channel === channel && this._note === note;
 		}
@@ -220,10 +238,18 @@
 		process(startSample, endSample, inputs, outputs) {
 			if (!this._active) return false;
 
-			const leftActive = this._leftPart.process(startSample, endSample, outputs[0]);
-			const rightActive = this._rightPart.process(startSample, endSample, outputs[1]);
+			const leftActive = this._leftPart.process(
+				startSample,
+				endSample,
+				outputs[0]
+			);
+			const rightActive = this._rightPart.process(
+				startSample,
+				endSample,
+				outputs[1]
+			);
 
-			this._active = (leftActive || rightActive);
+			this._active = leftActive || rightActive;
 			return this._active;
 		}
 	}
@@ -252,7 +278,12 @@
 		 * @param {Object} config optional config object
 		 */
 		/* eslint-disable-next-line no-unused-vars */
-		constructor(parameterInterpolators, samplesPerQuantum, sampleRate, config = {}) {
+		constructor(
+			parameterInterpolators,
+			samplesPerQuantum,
+			sampleRate,
+			config = {}
+		) {
 			/** @private @type {number} just two (stereo) */
 			this._numChannels = 2;
 
@@ -269,7 +300,8 @@
 			/** @private @type {WamParameterInterpolatorMap} */
 			this._parameterInterpolators = {};
 			Object.keys(this._parameterInfo).forEach((parameterId) => {
-				this._parameterInterpolators[parameterId] = parameterInterpolators[parameterId];
+				this._parameterInterpolators[parameterId] =
+					parameterInterpolators[parameterId];
 			});
 
 			/** @private @type {Uint8Array} array of voice state flags */
@@ -280,7 +312,13 @@
 			this._voices = [];
 			let i = 0;
 			while (i < this._numVoices) {
-				this._voices.push(new WamExampleTemplateSynthVoice(samplesPerQuantum, sampleRate, i));
+				this._voices.push(
+					new WamExampleTemplateSynthVoice(
+						samplesPerQuantum,
+						sampleRate,
+						i
+					)
+				);
 				i++;
 			}
 		}
@@ -340,7 +378,10 @@
 			/* stop all matching voices */
 			let i = 0;
 			while (i < this._numVoices) {
-				if (this._voiceStates[i] === 1 && this._voices[i].matches(channel, note)) {
+				if (
+					this._voiceStates[i] === 1 &&
+					this._voices[i].matches(channel, note)
+				) {
 					this._voices[i].noteOff(channel, note, velocity);
 				}
 				i++;
@@ -380,7 +421,12 @@
 			let i = 0;
 			while (i < this._numVoices) {
 				if (this._voiceStates[i] === 1) {
-					const stillActive = this._voices[i].process(startSample, endSample, inputs, outputs);
+					const stillActive = this._voices[i].process(
+						startSample,
+						endSample,
+						inputs,
+						outputs
+					);
 					if (!stillActive) this.noteEnd(i);
 				}
 				i++;
@@ -389,10 +435,11 @@
 	}
 
 	if (audioWorkletGlobalScope.AudioWorkletProcessor) {
-		if (!ModuleScope.WamExampleTemplateSynth) ModuleScope.WamExampleTemplateSynth = WamExampleTemplateSynth;
+		if (!ModuleScope.WamExampleTemplateSynth)
+			ModuleScope.WamExampleTemplateSynth = WamExampleTemplateSynth;
 	}
 
 	return WamExampleTemplateSynth;
- }
+};
 
- export default getWamExampleTemplateSynth
+export default getWamExampleTemplateSynth;

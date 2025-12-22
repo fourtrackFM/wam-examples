@@ -1,8 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable max-len */
 
-import { WamSoundFontSynth } from './WamSoundFontSynth.js';
-
 /**
  * @param {string} [moduleId]
  */
@@ -12,7 +10,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 
 	const ModuleScope =
 		audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
-	const { WamProcessor, WamSoundFontSynth, WamParameterInfo } = ModuleScope;
+	const { WamProcessor, WamParameterInfo, WamSoundFontSynth } = ModuleScope;
 
 	class WamSoundFontProcessor extends WamProcessor {
 		/**
@@ -21,6 +19,10 @@ const getWamSoundFontProcessor = (moduleId) => {
 		constructor(options) {
 			super(options);
 
+		}
+
+		_initialize = () => {
+			super._initialize();
 			/** @private @type {WamSoundFontSynth} */
 			this._synth = new WamSoundFontSynth(
 				this._parameterInterpolators,
@@ -40,7 +42,14 @@ const getWamSoundFontProcessor = (moduleId) => {
 				});
 			}
 
-			this.params = this._synth.generateWamParameterInfo();
+			// Generate parameters from synth config
+			const paramConfig = WamSoundFontSynth.getParameterConfig();
+			this.params = {};
+			for (const [id, config] of Object.entries(paramConfig)) {
+				this.params[id] = new WamParameterInfo(id, config);
+			}
+
+
 		}
 
 		/**
@@ -48,7 +57,12 @@ const getWamSoundFontProcessor = (moduleId) => {
 		 * @returns {WamParameterInfoMap}
 		 */
 		_generateWamParameterInfo() {
-			return this._synth.generateWamParameterInfo();
+			const paramConfig = WamSoundFontSynth.getParameterConfig();
+			const params = {};
+			for (const [id, config] of Object.entries(paramConfig)) {
+				params[id] = new WamParameterInfo(id, config);
+			}
+			return params;
 		}
 
 		/**

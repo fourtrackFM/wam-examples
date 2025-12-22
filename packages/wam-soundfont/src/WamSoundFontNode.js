@@ -6,9 +6,8 @@
 
 import addFunctionModule from '../../sdk/src/addFunctionModule.js';
 import WamNode from '../../sdk/src/WamNode.js';
-
-import getWamSoundFontSynth from './WamSoundFontSynth.js';
 import getWamSoundFontProcessor from './WamSoundFontProcessor.js';
+import getWamSoundFontSynth from './WamSoundFontSynth.js';
 
 /* eslint-disable no-empty-function */
 /* eslint-disable no-unused-vars */
@@ -28,10 +27,13 @@ export default class WamSoundFontNode extends WamNode {
 	 * Register scripts required for the processor. Must be called before constructor.
 	 * @param {BaseAudioContext} audioContext
 	 * @param {string} moduleId
+	 * @param {string} baseUrl
 	 */
-	static async addModules(audioContext, moduleId) {
+	static async addModules(audioContext, moduleId, baseUrl) {
 		const { audioWorklet } = audioContext;
 		await super.addModules(audioContext, moduleId);
+
+		await audioContext.audioWorklet.addModule(`${baseUrl}/spessasynth_core.js`);
 		await addFunctionModule(audioWorklet, getWamSoundFontSynth, moduleId);
 		await addFunctionModule(audioWorklet, getWamSoundFontProcessor, moduleId);
 	}
