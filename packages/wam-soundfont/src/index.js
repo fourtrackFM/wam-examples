@@ -28,21 +28,58 @@ export default class WamExampleTemplatePlugin extends WebAudioModule {
 	_descriptorUrl = `${this._baseUrl}/descriptor.json`;
 
 	async initialize(state) {
-		await this._loadDescriptor();
-		return super.initialize(state);
+		console.log('[Plugin] initialize() called with state:', state);
+		console.log('[Plugin] baseUrl:', this._baseUrl);
+		console.log('[Plugin] moduleId:', this.moduleId);
+		try {
+			await this._loadDescriptor();
+			console.log('[Plugin] descriptor loaded');
+		} catch (err) {
+			console.error('[Plugin] Failed to load descriptor:', err);
+			throw err;
+		}
+		try {
+			const result = await super.initialize(state);
+			console.log('[Plugin] super.initialize() completed');
+			return result;
+		} catch (err) {
+			console.error('[Plugin] super.initialize() failed:', err);
+			throw err;
+		}
 	}
 
 	async createAudioNode(initialState) {
-		// Load bundled synth and processor
-		await WamSoundFontNode.addModules(
-			this.audioContext,
-			this.moduleId,
-			this._baseUrl
+		console.log(
+			'[Plugin] createAudioNode() called with initialState:',
+			initialState
 		);
+		try {
+			// Load bundled synth and processor
+			console.log('[Plugin] Calling WamSoundFontNode.addModules()...');
+			await WamSoundFontNode.addModules(
+				this.audioContext,
+				this.moduleId,
+				this._baseUrl
+			);
+			console.log('[Plugin] addModules() completed');
+		} catch (err) {
+			console.error('[Plugin] addModules() failed:', err);
+			throw err;
+		}
 
 		// Create the audio node
+		console.log('[Plugin] Creating WamSoundFontNode...');
 		const wamSoundFontNode = new WamSoundFontNode(this, {});
-		await wamSoundFontNode._initialize();
+		console.log(
+			'[Plugin] WamSoundFontNode created, calling _initialize()...'
+		);
+		try {
+			await wamSoundFontNode._initialize();
+			console.log('[Plugin] WamSoundFontNode._initialize() completed');
+		} catch (err) {
+			console.error('[Plugin] Failed to initialize node:', err);
+			throw err;
+		}
 
 		// Load SoundFont file after initialization
 		console.log('[Plugin] Loading SoundFont...');

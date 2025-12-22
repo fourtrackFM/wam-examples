@@ -30,12 +30,67 @@ export default class WamSoundFontNode extends WamNode {
 	 * @param {string} baseUrl
 	 */
 	static async addModules(audioContext, moduleId, baseUrl) {
+		console.log('[WamSoundFontNode] addModules() called');
+		console.log('[WamSoundFontNode] baseUrl:', baseUrl);
+		console.log('[WamSoundFontNode] moduleId:', moduleId);
 		const { audioWorklet } = audioContext;
-		await super.addModules(audioContext, moduleId);
+		try {
+			console.log('[WamSoundFontNode] Calling super.addModules()...');
+			await super.addModules(audioContext, moduleId);
+			console.log('[WamSoundFontNode] super.addModules() completed');
+		} catch (err) {
+			console.error('[WamSoundFontNode] super.addModules() failed:', err);
+			throw err;
+		}
 
-		await audioContext.audioWorklet.addModule(`${baseUrl}/spessasynth_core.js`);
-		await addFunctionModule(audioWorklet, getWamSoundFontSynth, moduleId);
-		await addFunctionModule(audioWorklet, getWamSoundFontProcessor, moduleId);
+		try {
+			console.log('[WamSoundFontNode] Loading spessasynth_core.js...');
+			await audioContext.audioWorklet.addModule(
+				`${baseUrl}/spessasynth_core.js`
+			);
+			console.log('[WamSoundFontNode] spessasynth_core.js loaded');
+		} catch (err) {
+			console.error(
+				'[WamSoundFontNode] Failed to load spessasynth_core.js:',
+				err
+			);
+			throw err;
+		}
+
+		try {
+			console.log('[WamSoundFontNode] Adding getWamSoundFontSynth...');
+			await addFunctionModule(
+				audioWorklet,
+				getWamSoundFontSynth,
+				moduleId
+			);
+			console.log('[WamSoundFontNode] getWamSoundFontSynth added');
+		} catch (err) {
+			console.error(
+				'[WamSoundFontNode] Failed to add getWamSoundFontSynth:',
+				err
+			);
+			throw err;
+		}
+
+		try {
+			console.log(
+				'[WamSoundFontNode] Adding getWamSoundFontProcessor...'
+			);
+			await addFunctionModule(
+				audioWorklet,
+				getWamSoundFontProcessor,
+				moduleId
+			);
+			console.log('[WamSoundFontNode] getWamSoundFontProcessor added');
+		} catch (err) {
+			console.error(
+				'[WamSoundFontNode] Failed to add getWamSoundFontProcessor:',
+				err
+			);
+			throw err;
+		}
+		console.log('[WamSoundFontNode] addModules() completed successfully');
 	}
 
 	/**
@@ -43,17 +98,27 @@ export default class WamSoundFontNode extends WamNode {
 	 * @param {AudioWorkletNodeOptions} options
 	 */
 	constructor(module, options) {
+		console.log(
+			'[WamSoundFontNode] constructor called with options:',
+			options
+		);
 		options.numberOfInputs = 1;
 		options.numberOfOutputs = 1;
 		options.outputChannelCount = [2];
 		options.processorOptions = { useSab: true };
+		console.log(
+			'[WamSoundFontNode] Calling super() with processed options:',
+			options
+		);
 		super(module, options);
+		console.log('[WamSoundFontNode] super() completed');
 
 		/** @type {Set<WamEventType>} */
 		this._supportedEventTypes = new Set(['wam-automation', 'wam-midi']);
 
 		/** @private @type {WamExampleTemplateHTMLElement} */
 		this._gui = null;
+		console.log('[WamSoundFontNode] constructor completed');
 	}
 
 	/**
@@ -98,6 +163,21 @@ export default class WamSoundFontNode extends WamNode {
 			const event = { type, data };
 			this._onEvent(event);
 		});
+	}
+
+	async _initialize() {
+		console.log('[WamSoundFontNode] _initialize() called');
+		try {
+			const result = await super._initialize();
+			console.log(
+				'[WamSoundFontNode] super._initialize() completed, result:',
+				result
+			);
+			return result;
+		} catch (err) {
+			console.error('[WamSoundFontNode] _initialize() error:', err);
+			throw err;
+		}
 	}
 
 	destroy() {

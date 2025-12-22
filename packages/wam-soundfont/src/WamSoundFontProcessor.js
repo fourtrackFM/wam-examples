@@ -17,18 +17,67 @@ const getWamSoundFontProcessor = (moduleId) => {
 		 * @param {AudioWorkletNodeOptions} options
 		 */
 		constructor(options) {
+			console.log(
+				'[WamSoundFontProcessor] constructor called with options:',
+				options
+			);
 			super(options);
-
+			console.log('[WamSoundFontProcessor] super() completed');
+			console.log(
+				'[WamSoundFontProcessor] _initialize is:',
+				typeof this._initialize
+			);
 		}
 
-		_initialize = () => {
-			super._initialize();
-			/** @private @type {WamSoundFontSynth} */
-			this._synth = new WamSoundFontSynth(
-				this._parameterInterpolators,
-				this._samplesPerQuantum,
-				globalThis.sampleRate
-			);
+		_initialize() {
+			try {
+				console.log('[WamSoundFontProcessor] _initialize() called');
+				console.log(
+					'[WamSoundFontProcessor] ModuleScope available:',
+					!!ModuleScope
+				);
+				console.log(
+					'[WamSoundFontProcessor] ModuleScope keys:',
+					ModuleScope ? Object.keys(ModuleScope) : 'N/A'
+				);
+
+				super._initialize();
+				console.log(
+					'[WamSoundFontProcessor] super._initialize() completed'
+				);
+
+				console.log(
+					'[WamSoundFontProcessor] Creating WamSoundFontSynth...'
+				);
+				console.log(
+					'[WamSoundFontProcessor] ModuleScope.WamSoundFontSynth:',
+					typeof ModuleScope.WamSoundFontSynth
+				);
+
+				if (!ModuleScope.WamSoundFontSynth) {
+					throw new Error(
+						'WamSoundFontSynth not found in ModuleScope! Available: ' +
+							Object.keys(ModuleScope).join(', ')
+					);
+				}
+
+				/** @private @type {WamSoundFontSynth} */
+				this._synth = new ModuleScope.WamSoundFontSynth(
+					this._parameterInterpolators,
+					this._samplesPerQuantum,
+					globalThis.sampleRate
+				);
+				console.log(
+					'[WamSoundFontProcessor] WamSoundFontSynth created:',
+					this._synth
+				);
+			} catch (err) {
+				console.error(
+					'[WamSoundFontProcessor] _initialize() error:',
+					err
+				);
+				throw err;
+			}
 
 			/** @private @type {ArrayBuffer} */
 			this._sf2Buffer = options.processorOptions?.sf2Buffer || null;
@@ -48,8 +97,6 @@ const getWamSoundFontProcessor = (moduleId) => {
 			for (const [id, config] of Object.entries(paramConfig)) {
 				this.params[id] = new WamParameterInfo(id, config);
 			}
-
-
 		}
 
 		/**
@@ -94,6 +141,16 @@ const getWamSoundFontProcessor = (moduleId) => {
 		 * @param {MessageEvent} message
 		 */
 		async _onMessage(message) {
+			console.log(
+				'[WamSoundFontProcessor] _onMessage received:',
+				message.data
+			);
+
+			// Let base class handle its messages first
+			if (super._onMessage) {
+				await super._onMessage(message);
+			}
+
 			const { data } = message;
 
 			if (data?.type === 'loadSoundFont' && data.buffer) {
