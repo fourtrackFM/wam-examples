@@ -27,15 +27,15 @@
  * @param {string} [moduleId]
  * @returns {WamExampleTemplateProcessorConstructor}
  */
- const getWamExampleTemplateProcessor = (moduleId) => {
-
+const getWamExampleTemplateProcessor = (moduleId) => {
 	/** @type {AudioWorkletGlobalScope} */
 	// @ts-ignore
 	const audioWorkletGlobalScope = globalThis;
 	const { registerProcessor } = audioWorkletGlobalScope;
 
 	/** @type {WamExampleTemplateModuleScope} */
-	const ModuleScope = audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
+	const ModuleScope =
+		audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 	const {
 		WamProcessor,
 		WamParameterInfo,
@@ -45,7 +45,7 @@
 
 	/**
 	 * `WamExampleTemplate`'s `AudioWorkletProcessor`
-	 * 
+	 *
 	 * @class
 	 * @extends {WamProcessor}
 	 * @implements {IWamExampleTemplateProcessor}
@@ -89,15 +89,23 @@
 			const synthConfig = {
 				passInput: true,
 			};
-			this._synth = new WamExampleTemplateSynth(this._parameterInterpolators, this._samplesPerQuantum, globalThis.sampleRate,
-				synthConfig);
+			this._synth = new WamExampleTemplateSynth(
+				this._parameterInterpolators,
+				this._samplesPerQuantum,
+				globalThis.sampleRate,
+				synthConfig
+			);
 
 			const effectConfig = {
 				numChannels: 2,
 				inPlace: true,
 			};
-			this._effect = new WamExampleTemplateEffect(this._parameterInterpolators, this._samplesPerQuantum, globalThis.sampleRate,
-				effectConfig);
+			this._effect = new WamExampleTemplateEffect(
+				this._parameterInterpolators,
+				this._samplesPerQuantum,
+				globalThis.sampleRate,
+				effectConfig
+			);
 		}
 
 		/**
@@ -115,19 +123,53 @@
 
 			// handle midi as needed here
 			switch (type) {
-			case 0x80: { /* note off */
-				this._synth.noteOff(channel, data1, data2);
-			} break;
-			case 0x90: { /* note on */
-				this._synth.noteOn(channel, data1, data2);
-			} break;
-			case 0xa0: { /* aftertouch */ } break;
-			case 0xb0: { /* continuous controller */ } break;
-			case 0xc0: { /* patch change */ } break;
-			case 0xd0: { /* channel pressure */ } break;
-			case 0xe0: { /* pitch bend */ } break;
-			case 0xf0: { /* system */ } break;
-			default: { /* invalid */ } break;
+				case 0x80:
+					{
+						/* note off */
+						this._synth.noteOff(channel, data1, data2);
+					}
+					break;
+				case 0x90:
+					{
+						/* note on */
+						this._synth.noteOn(channel, data1, data2);
+					}
+					break;
+				case 0xa0:
+					{
+						/* aftertouch */
+					}
+					break;
+				case 0xb0:
+					{
+						/* continuous controller */
+					}
+					break;
+				case 0xc0:
+					{
+						/* patch change */
+					}
+					break;
+				case 0xd0:
+					{
+						/* channel pressure */
+					}
+					break;
+				case 0xe0:
+					{
+						/* pitch bend */
+					}
+					break;
+				case 0xf0:
+					{
+						/* system */
+					}
+					break;
+				default:
+					{
+						/* invalid */
+					}
+					break;
 			}
 		}
 
@@ -143,7 +185,8 @@
 			const output = outputs[0];
 			if (input.length !== output.length) return;
 
-			const bypass = !!this._parameterInterpolators.bypass.values[startSample];
+			const bypass =
+				!!this._parameterInterpolators.bypass.values[startSample];
 
 			if (bypass) {
 				for (let c = 0; c < output.length; ++c) {
@@ -169,6 +212,6 @@
 	}
 
 	return WamExampleTemplateProcessor;
- }
+};
 
- export default getWamExampleTemplateProcessor;
+export default getWamExampleTemplateProcessor;

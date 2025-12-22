@@ -7,8 +7,8 @@
 import addFunctionModule from '../../sdk/src/addFunctionModule.js';
 import WamNode from '../../sdk/src/WamNode.js';
 
-import getWamExampleTemplateSynth from './WamSoundFontSynth.js';
-import getWamExampleTemplateProcessor from './WamSoundFontProcessor.js';
+import getWamSoundFontSynth from './WamSoundFontSynth.js';
+import getWamSoundFontProcessor from './WamSoundFontProcessor.js';
 
 /* eslint-disable no-empty-function */
 /* eslint-disable no-unused-vars */
@@ -23,7 +23,7 @@ import getWamExampleTemplateProcessor from './WamSoundFontProcessor.js';
  * @property {WamParameterDataMap} parameterValues
  */
 
-export default class WamExampleTemplateNode extends WamNode {
+export default class WamSoundFontNode extends WamNode {
 	/**
 	 * Register scripts required for the processor. Must be called before constructor.
 	 * @param {BaseAudioContext} audioContext
@@ -32,26 +32,19 @@ export default class WamExampleTemplateNode extends WamNode {
 	static async addModules(audioContext, moduleId) {
 		const { audioWorklet } = audioContext;
 		await super.addModules(audioContext, moduleId);
-		await addFunctionModule(
-			audioWorklet,
-			getWamExampleTemplateSynth,
-			moduleId
-		);
-		await addFunctionModule(
-			audioWorklet,
-			getWamExampleTemplateProcessor,
-			moduleId
-		);
+		await addFunctionModule(audioWorklet, getWamSoundFontSynth, moduleId);
+		await addFunctionModule(audioWorklet, getWamSoundFontProcessor, moduleId);
 	}
 
 	/**
-	 * @param {WebAudioModule<WamExampleTemplateNode>} module
+	 * @param {WebAudioModule<WamSoundFontNode>} module
 	 * @param {AudioWorkletNodeOptions} options
 	 */
 	constructor(module, options) {
 		options.numberOfInputs = 1;
 		options.numberOfOutputs = 1;
 		options.outputChannelCount = [2];
+		options.processorOptions = { useSab: true };
 		super(module, options);
 
 		/** @type {Set<WamEventType>} */
@@ -59,15 +52,6 @@ export default class WamExampleTemplateNode extends WamNode {
 
 		/** @private @type {WamExampleTemplateHTMLElement} */
 		this._gui = null;
-	}
-
-	/**
-	 * Initialize node
-	 */
-	async _initialize() {
-		// Call parent initialization
-		await super._initialize();
-		console.log('[Node] Initialized');
 	}
 
 	/**

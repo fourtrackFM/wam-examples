@@ -4,7 +4,6 @@
 import WebAudioModule from '../../sdk/src/WebAudioModule.js';
 // DSP
 import WamExampleTemplateNode from './WamSoundFontNode.js';
-import { parseSF2 } from './sf2-parser.js';
 // GUI
 import { createElement } from './Gui/index.js';
 
@@ -34,26 +33,36 @@ export default class WamExampleTemplatePlugin extends WebAudioModule {
 	}
 
 	async createAudioNode(initialState) {
-		// Load SoundFont file
-		console.log('[Plugin] Loading SoundFont...');
-		const soundfontUrl = 'https://static.fourtrack.fm/GeneralUser-GS.sf2';
-		const response = await fetch(soundfontUrl);
-		const arrayBuffer = await response.arrayBuffer();
-		console.log('[Plugin] SoundFont loaded, size:', arrayBuffer.byteLength);
-
-		// DSP is implemented in WamExampleTemplateProcessor.
+		// Load the bundled processor (includes spessasynth_core)
+		const processorUrl = `${this._baseUrl}/WamSoundFontProcessor.js`;
 		await WamExampleTemplateNode.addModules(
 			this.audioContext,
-			this.moduleId
+			this.moduleId,
+			processorUrl
 		);
 
-		// Pass SF2 buffer through processor options - synth will parse all programs
-		const wamExampleTemplateNode = new WamExampleTemplateNode(this, {
-			processorOptions: {
-				sf2Buffer: arrayBuffer,
-			},
-		});
+		// Create the audio node
+		const wamExampleTemplateNode = new WamExampleTemplateNode(this, {});
 		await wamExampleTemplateNode._initialize();
+
+		// Load SoundFont file after initialization
+		console.log('[Plugin] Loading SoundFont...');
+		const soundfontUrl = 'https://static.fourtrack.fm/GeneralUser-GS.sf2';
+
+		try {
+			const response = await fetch(soundfontUrl);
+			const arrayBuffer = await response.arrayBuffer();
+			console.log(
+				'[Plugin] SoundFont loaded, size:',
+				arrayBuffer.byteLength
+			);
+
+			// Send soundfont to processor
+			// todo: how to hook this up properly?
+			// await wamExampleTemplateNode.loadSoundFont(arrayBuffer);
+		} catch (error) {
+			console.error('[Plugin] Failed to load SoundFont:', error);
+		}
 
 		// Set initial state if applicable
 		if (initialState) wamExampleTemplateNode.setState(initialState);
