@@ -2,7 +2,7 @@
  * Unit test for SF2 parser - tests all programs in the soundfont
  */
 
-import { parseSF2 } from '../src/sf2-parser.js';
+import { parseCompleteSF2Structure } from '../src/WamSoundFontSynth.js';
 import fs from 'fs';
 import https from 'https';
 import path from 'path';

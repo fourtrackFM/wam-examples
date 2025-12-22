@@ -725,12 +725,19 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			}
 		}
 
-		if (!preset) preset = hydra.presetHeaders[0];
+		if (!preset) {
+			throw new Error(
+				`No preset found for program ${programNumber} bank ${bankNumber}`
+			);
+		}
 
 		// Get preset zones and find instrument
-		const nextBagIndex =
-			hydra.presetHeaders[hydra.presetHeaders.indexOf(preset) + 1]
-				.bagIndex;
+		const presetIndex = hydra.presetHeaders.indexOf(preset);
+		if (presetIndex === -1 || presetIndex >= hydra.presetHeaders.length - 1) {
+			throw new Error('Invalid preset index');
+		}
+
+		const nextBagIndex = hydra.presetHeaders[presetIndex + 1].bagIndex;
 		const presetBags = hydra.presetBags.slice(
 			preset.bagIndex,
 			nextBagIndex
@@ -774,6 +781,20 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		let velRange = { lo: 0, hi: 127 };
 		let overrideRootKey = null;
 
+		// Initialize generators with SF2 spec defaults (section 8.1.2)
+		// Must be in outer scope so it's accessible in return statement
+		const generators = {
+			delayVolEnv: -12000, // 0.001 seconds
+			attackVolEnv: -12000, // 0.001 seconds
+			holdVolEnv: -12000, // 0.001 seconds
+			decayVolEnv: -12000, // 0.001 seconds
+			sustainVolEnv: 0, // 0 centibels = full volume
+			releaseVolEnv: -12000, // 0.001 seconds
+			initialAttenuation: 0, // 0 centibels = no attenuation
+			coarseTune: 0, // 0 semitones
+			fineTune: 0, // 0 cents
+		};
+
 		for (const bag of instrumentBags) {
 			const nextGenIndex =
 				instrumentBags.indexOf(bag) + 1 < instrumentBags.length
@@ -812,6 +833,40 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				);
 				if (rootKeyGen) overrideRootKey = rootKeyGen.amount;
 
+				// Override with actual generator values from SF2
+				for (const gen of gens) {
+					switch (gen.oper) {
+						case 33: // delayVolEnv
+							generators.delayVolEnv = gen.amount;
+							break;
+						case 34: // attackVolEnv
+							generators.attackVolEnv = gen.amount;
+							break;
+						case 35: // holdVolEnv
+							generators.holdVolEnv = gen.amount;
+							break;
+						case 36: // decayVolEnv
+							generators.decayVolEnv = gen.amount;
+							break;
+						case 37: // sustainVolEnv (in centibels)
+							generators.sustainVolEnv = gen.amount;
+							break;
+						case 38: // releaseVolEnv
+							generators.releaseVolEnv = gen.amount;
+							break;
+						case 48: // initialAttenuation (in centibels)
+							generators.initialAttenuation = gen.amount;
+							break;
+						case 51: // coarseTune (in semitones)
+							generators.coarseTune = gen.amount;
+							break;
+						case 52: // fineTune (in cents)
+							generators.fineTune = gen.amount;
+							break;
+						// Add more generators as needed (filter, LFO, etc.)
+					}
+				}
+
 				break;
 			}
 		}
@@ -837,6 +892,7 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				// Use relative loop points
 				loopStart: relativeLoopStart,
 				loopEnd: relativeLoopEnd,
+				generators, // Include extracted generator values
 			},
 			sampleRate: sample.sampleRate,
 			program: programNumber,
@@ -845,27 +901,39 @@ const getWamExampleTemplateSynth = (moduleId) => {
 	}
 
 	/**
-	 * Parse all programs from SF2 file
+	 * Parse all programs that actually exist in the SF2 file
 	 * @param {ArrayBuffer} arrayBuffer
 	 * @param {number} bankNumber
 	 * @returns {Array}
 	 */
 	function parseAllSF2Programs(arrayBuffer, bankNumber = 0) {
-		console.log('[Synth] Parsing all programs from SF2...');
+		console.log('[Synth] Reading all presets from SF2...');
 		const allPrograms = [];
 
-		for (let program = 0; program < 128; program++) {
+		// First, get the hydra structure to see what presets actually exist
+		const hydra = parseCompleteSF2Structure(arrayBuffer);
+		
+		// Iterate through actual presets in the file (excluding terminator)
+		for (let i = 0; i < hydra.presetHeaders.length - 1; i++) {
+			const preset = hydra.presetHeaders[i];
+			
+			// Only parse presets from the requested bank
+			if (preset.bank !== bankNumber) continue;
+			
 			try {
-				const programData = parseSF2(arrayBuffer, program, bankNumber);
+				const programData = parseSF2(arrayBuffer, preset.preset, preset.bank);
 				if (programData && programData.sampleData) {
 					allPrograms.push(programData);
 				}
 			} catch (error) {
-				console.warn('[Synth] Failed to parse program', program);
+				console.warn(
+					`[Synth] Failed to parse preset "${preset.name}" (program ${preset.preset}, bank ${preset.bank}):`,
+					error.message
+				);
 			}
 		}
 
-		console.log('[Synth] Parsed', allPrograms.length, 'programs');
+		console.log('[Synth] Successfully parsed', allPrograms.length, 'programs from bank', bankNumber);
 		return allPrograms;
 	}
 
@@ -1082,18 +1150,39 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			this._loopStart = 0;
 			this._loopEnd = 0;
 			this._sampleDataSampleRate = 44100; // SF2 sample's native sample rate
+
+			// Volume envelope state (ADSR)
+			this._envPhase = 0; // 0=delay, 1=attack, 2=hold, 3=decay, 4=sustain, 5=release, 6=off
+			this._envLevel = 0.0;
+			this._envTime = 0.0;
+
+			// Envelope parameters (in seconds and linear gain)
+			this._delayTime = 0.0;
+			this._attackTime = 0.001;
+			this._holdTime = 0.0;
+			this._decayTime = 0.001;
+			this._sustainLevel = 1.0; // 0.0 to 1.0
+			this._releaseTime = 0.001;
+
+			// Generator values
+			this._initialAttenuation = 0.0; // in dB
+			this._coarseTune = 0; // semitones
+			this._fineTune = 0; // cents
 		}
 
 		reset() {
 			this._active = false;
 			this._gain = 0.0;
 			this._samplePosition = 0;
+			this._envPhase = 0;
+			this._envLevel = 0.0;
+			this._envTime = 0.0;
 		}
 
 		/**
 		 * Set sample data for playback
 		 * @param {Int16Array} sampleData
-		 * @param {Object} metadata - Sample metadata with rootKey, loop points, and sampleRate
+		 * @param {Object} metadata - Sample metadata with rootKey, loop points, sampleRate, and generators
 		 */
 		setSampleData(sampleData, metadata) {
 			this._sampleData = sampleData;
@@ -1102,6 +1191,42 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			this._loopEnd =
 				metadata.loopEnd || (sampleData ? sampleData.length : 0);
 			this._sampleDataSampleRate = metadata.sampleRate || 44100;
+
+			// SF2 spec defaults if no generators provided (section 8.1.2)
+			const g = metadata.generators || {
+				delayVolEnv: -12000,
+				attackVolEnv: -12000,
+				holdVolEnv: -12000,
+				decayVolEnv: -12000,
+				sustainVolEnv: 0,
+				releaseVolEnv: -12000,
+				initialAttenuation: 0,
+				coarseTune: 0,
+				fineTune: 0,
+			};
+
+			// Convert timecent values to seconds: time = 2^(timecents/1200)
+			const timecentsToSeconds = (tc) => Math.pow(2, tc / 1200.0);
+
+			// Volume Envelope - always apply (use defaults if not specified)
+			this._delayTime = timecentsToSeconds(g.delayVolEnv);
+			this._attackTime = Math.max(0.001, timecentsToSeconds(g.attackVolEnv));
+			this._holdTime = timecentsToSeconds(g.holdVolEnv);
+			this._decayTime = Math.max(0.001, timecentsToSeconds(g.decayVolEnv));
+			
+			// sustainVolEnv is in centibels of attenuation (0-1000+)
+			// Convert to linear gain: gain = 10^(-attenuation/200)
+			const attenuationCB = Math.max(0, Math.min(1440, g.sustainVolEnv));
+			this._sustainLevel = Math.pow(10, -attenuationCB / 200.0);
+			
+			this._releaseTime = Math.max(0.001, timecentsToSeconds(g.releaseVolEnv));
+
+			// Initial Attenuation (in centibels)
+			this._initialAttenuation = g.initialAttenuation / 10.0; // Convert cB to dB
+
+			// Tuning
+			this._coarseTune = g.coarseTune;
+			this._fineTune = g.fineTune;
 		}
 
 		/**
@@ -1111,11 +1236,27 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 */
 		start(gain, frequency) {
 			this._active = true;
-			this._gain = gain * 0.3;
+
+			// Apply initial attenuation (convert dB to linear gain)
+			const attenuationGain = Math.pow(
+				10,
+				-this._initialAttenuation / 20.0
+			);
+			this._gain = gain * 0.3 * attenuationGain;
+
 			this._samplePosition = 0;
 
-			// Calculate playback rate based on root key
-			const rootFreq = 440.0 * Math.pow(2.0, (this._rootKey - 69) / 12.0);
+			// Initialize envelope
+			this._envPhase = this._delayTime > 0.00001 ? 0 : 1; // Start delay or attack
+			this._envLevel = 0.0;
+			this._envTime = 0.0;
+
+			// Apply tuning (coarseTune in semitones, fineTune in cents)
+			const tuningOffset = this._coarseTune + this._fineTune / 100.0;
+			const tunedRootKey = this._rootKey + tuningOffset;
+
+			// Calculate playback rate based on tuned root key
+			const rootFreq = 440.0 * Math.pow(2.0, (tunedRootKey - 69) / 12.0);
 			// Account for both pitch difference AND sample rate difference
 			const sampleRateRatio =
 				this._sampleDataSampleRate / this._sampleRate;
@@ -1127,8 +1268,17 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		 * @param {boolean} force
 		 */
 		stop(force) {
-			this._active = false;
-			this._gain = 0.0;
+			if (force) {
+				this._active = false;
+				this._gain = 0.0;
+				this._envPhase = 6; // off
+			} else {
+				// Trigger release phase
+				if (this._envPhase < 5) {
+					this._envPhase = 5; // release
+					this._envTime = 0.0;
+				}
+			}
 		}
 
 		/**
@@ -1147,7 +1297,96 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				return false;
 			}
 
+			const dt = 1.0 / this._sampleRate; // Time per sample
+
 			for (let n = startSample; n < endSample; n++) {
+				// Update envelope state machine
+				this._envTime += dt;
+
+				switch (this._envPhase) {
+					case 0: // Delay
+						this._envLevel = 0.0;
+						if (this._envTime >= this._delayTime) {
+							this._envPhase = 1;
+							this._envTime = 0.0;
+						}
+						break;
+
+					case 1: // Attack
+						if (this._attackTime > 0.00001) {
+							this._envLevel = Math.min(
+								1.0,
+								this._envTime / this._attackTime
+							);
+							if (this._envLevel >= 1.0) {
+								this._envPhase = 2;
+								this._envTime = 0.0;
+							}
+						} else {
+							this._envLevel = 1.0;
+							this._envPhase = 2;
+							this._envTime = 0.0;
+						}
+						break;
+
+					case 2: // Hold
+						this._envLevel = 1.0;
+						if (this._envTime >= this._holdTime) {
+							this._envPhase = 3;
+							this._envTime = 0.0;
+						}
+						break;
+
+					case 3: // Decay
+						if (this._decayTime > 0.00001) {
+							const decayProgress =
+								this._envTime / this._decayTime;
+							this._envLevel =
+								1.0 -
+								decayProgress * (1.0 - this._sustainLevel);
+							if (this._envLevel <= this._sustainLevel) {
+								this._envLevel = this._sustainLevel;
+								this._envPhase = 4;
+								this._envTime = 0.0;
+							}
+						} else {
+							this._envLevel = this._sustainLevel;
+							this._envPhase = 4;
+							this._envTime = 0.0;
+						}
+						break;
+
+					case 4: // Sustain
+						this._envLevel = this._sustainLevel;
+						// Stay in sustain until note off
+						break;
+
+					case 5: // Release
+						if (this._releaseTime > 0.00001) {
+							const releaseStart = this._envLevel;
+							const releaseProgress =
+								this._envTime / this._releaseTime;
+							this._envLevel = Math.max(
+								0.0,
+								releaseStart * (1.0 - releaseProgress)
+							);
+							if (this._envLevel <= 0.0001) {
+								this._envPhase = 6;
+								this._active = false;
+								return false;
+							}
+						} else {
+							this._envPhase = 6;
+							this._active = false;
+							return false;
+						}
+						break;
+
+					default: // Off
+						this._active = false;
+						return false;
+				}
+
 				let sampleIndex = Math.floor(this._samplePosition);
 
 				// Handle looping: when we reach loopEnd, jump back to loopStart
@@ -1168,7 +1407,8 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				if (sampleIndex >= 0 && sampleIndex < this._sampleData.length) {
 					// Convert Int16 to float32 (-1 to 1)
 					const sampleValue = this._sampleData[sampleIndex] / 32768.0;
-					signal[n] += this._gain * sampleValue;
+					// Apply gain and envelope
+					signal[n] += this._gain * this._envLevel * sampleValue;
 					this._samplePosition += this._playbackRate;
 				} else {
 					// If no valid loop, stop when we reach the end
@@ -1454,11 +1694,11 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			for (let i = 0; i < this._numVoices; i++) {
 				this._voices[i]._leftPart.setSampleData(
 					this._sampleData,
-					metadata.selectedSample
+					metadata
 				);
 				this._voices[i]._rightPart.setSampleData(
 					this._sampleData,
-					metadata.selectedSample
+					metadata
 				);
 			}
 
@@ -1468,9 +1708,9 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				'sample length:',
 				this._sampleData ? this._sampleData.length : 0,
 				'loop:',
-				metadata.selectedSample?.loopStart || 0,
+				metadata.loopStart || 0,
 				'-',
-				metadata.selectedSample?.loopEnd || 0
+				metadata.loopEnd || 0
 			);
 		}
 
@@ -1493,37 +1733,30 @@ const getWamExampleTemplateSynth = (moduleId) => {
 		loadSoundFontData(data) {
 			console.log('[Synth] Loading SoundFont data', data);
 
-			// Extract metadata
-			const metadata = {};
-			if (data.selectedSample) {
-				metadata.rootKey =
-					data.selectedSample.rootKey ||
-					data.selectedSample.originalPitch ||
-					60;
-				metadata.loopStart = data.selectedSample.loopStart || 0;
-				metadata.loopEnd =
-					data.selectedSample.loopEnd || data.sampleData.length;
-				console.log('[Synth] Sample metadata:', metadata);
-			}
-
-			// Store program data
+			// Store program data with full selectedSample metadata
 			const program = data.program || 0;
 			this._programMap.set(program, {
 				sampleData: data.sampleData,
-				metadata: metadata,
+				metadata: data.selectedSample || {
+					rootKey: 60,
+					loopStart: 0,
+					loopEnd: data.sampleData ? data.sampleData.length : 0,
+					sampleRate: data.sampleRate || 44100,
+				},
 			});
 
 			// If this is the current program, activate it
 			if (program === this._currentProgram) {
 				this._sampleData = data.sampleData;
+				const metadata = this._programMap.get(program).metadata;
 				for (let i = 0; i < this._numVoices; i++) {
 					this._voices[i]._leftPart.setSampleData(
 						this._sampleData,
-						data.selectedSample || metadata
+						metadata
 					);
 					this._voices[i]._rightPart.setSampleData(
 						this._sampleData,
-						data.selectedSample || metadata
+						metadata
 					);
 				}
 			}
