@@ -4,9 +4,28 @@ import copy from 'rollup-plugin-copy';
 
 /** @type {import('rollup').RollupOptions[]} */
 export default [
-	// Main plugin bundle - bundles everything including spessasynth
+	// Spessasynth wrapper to expose exports to globalThis
+	{
+		input: 'src/spessasynth_wrapper.js',
+		output: {
+			file: 'dist/spessasynth_core.js',
+			format: 'es',
+			sourcemap: false,
+		},
+		plugins: [
+			resolve({
+				browser: true,
+			}),
+			commonjs(),
+		],
+	},
+	// Main plugin bundle
 	{
 		input: 'src/index.js',
+		external: [
+			'./WamSoundFontProcessor.worklet.js',
+			'./spessasynth_core.js',
+		],
 		output: {
 			dir: 'dist/',
 			format: 'es',
@@ -24,11 +43,6 @@ export default [
 					{
 						src: 'src/WamSoundFontProcessor.worklet.js',
 						dest: 'dist/',
-					},
-					{
-						src: '../../node_modules/spessasynth_lib/dist/spessasynth_processor.min.js',
-						dest: 'dist/',
-						rename: 'spessasynth_core.js',
 					},
 					{ src: 'src/Gui/**/*', dest: 'dist/Gui/' },
 					{ src: 'lib/**/*', dest: 'dist/' },

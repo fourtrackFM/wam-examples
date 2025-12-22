@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "WAM SoundFont Player",
   "type": "module",
+  "main": "dist/index.js",
   "scripts": {
     "clean": "if exist dist rmdir /s /q dist",
     "prebuild": "npm run clean",
@@ -12,7 +13,7 @@
     "test": "node test/sf2-parser.test.js && node test/sf2-debug.test.js"
   },
   "dependencies": {
-    "spessasynth_lib": "^4.0.19"
+    "spessasynth_core": "^4.0.24"
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^28.0.9",

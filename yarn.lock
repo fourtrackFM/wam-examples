@@ -10730,15 +10730,10 @@ spdx-license-ids@^3.0.0:
   resolved "https://registry.npmjs.org/spdx-license-ids/-/spdx-license-ids-3.0.11.tgz"
   integrity sha512-Ctl2BrFiM0X3MANYgj3CkygxhRmr9mi6xhejbdO960nF6EDJApTYpn0BQnDKlnNBULKiCN1n3w9EBkHK8ZWg+g==
 
-spessasynth_core@latest:
+spessasynth_core@^4.0.24:
   version "4.0.24"
-
-spessasynth_lib@^4.0.19:
-  version "4.0.19"
-  resolved "https://registry.npmjs.org/spessasynth_lib/-/spessasynth_lib-4.0.19.tgz"
-  integrity sha512-f2xKjvFN5kCX8XLxJvBVVp2ShBlTQ/t8CtPySlFCu8mFPD4KZjL/v+oLaFfQ+fCoeX/Hpu3SofmwRc5r78NmOQ==
-  dependencies:
-    spessasynth_core latest
+  resolved "https://registry.npmjs.org/spessasynth_core/-/spessasynth_core-4.0.24.tgz"
+  integrity sha512-uEu8DqSlgpqJAnpOnLvY5fd6RcVPQyTmoB7ygD0njXdGzSYI8xTPhH9bvefia8rS8lIUa2bI9zzn/YqVNaYVXw==
 
 split-on-first@^1.0.0:
   version "1.1.0"
@@ -11697,8 +11692,6 @@ walker@^1.0.7, walker@~1.0.5:
 "wam-soundfont@file:C:\\Users\\acous\\Documents\\GitHub\\wam-examples\\packages\\wam-soundfont":
   version "1.0.0"
   resolved "file:packages/wam-soundfont"
-  dependencies:
-    spessasynth_lib "^4.0.19"
 
 watchpack@^2.3.1:
   version "2.3.1"

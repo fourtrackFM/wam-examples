@@ -3,7 +3,6 @@
 
 // This processor acts as a passthrough WAM wrapper
 // The actual synthesis is done by spessasynth's worklet processor
-// which is managed by WorkletSynthesizer in the main thread
 const getWamSoundFontProcessor = (moduleId) => {
 	const audioWorkletGlobalScope = globalThis;
 	const { registerProcessor } = audioWorkletGlobalScope;
@@ -11,6 +10,10 @@ const getWamSoundFontProcessor = (moduleId) => {
 	const ModuleScope =
 		audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
 	const { WamProcessor } = ModuleScope;
+
+	// Import SpessaSynthProcessor from the previously loaded module
+	// Since spessasynth_core.js is loaded via addModule, check for its exports in globalThis
+	const { SpessaSynthProcessor, SoundBankLoader } = audioWorkletGlobalScope;
 
 	class WamSoundFontProcessor extends WamProcessor {
 		/**
@@ -24,6 +27,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 			super(options);
 			console.log('[WamSoundFontProcessor] super() completed');
 			this._ready = false;
+			this._soundFontLoaded = false;
 		}
 
 		_initialize() {
@@ -33,6 +37,16 @@ const getWamSoundFontProcessor = (moduleId) => {
 				console.log(
 					'[WamSoundFontProcessor] super._initialize() completed'
 				);
+
+				// Initialize the spessasynth processor
+				console.log(
+					'[WamSoundFontProcessor] Creating SpessaSynthProcessor...'
+				);
+				this._synthesizer = new SpessaSynthProcessor(44100); // this.samplerate raises NaN
+				console.log(
+					'[WamSoundFontProcessor] SpessaSynthProcessor created'
+				);
+
 				this._ready = true;
 			} catch (err) {
 				console.error(
@@ -150,22 +164,14 @@ const getWamSoundFontProcessor = (moduleId) => {
 			const rightChannel = output[1];
 			const bufferSize = leftChannel.length;
 
-			// Render audio from synthesizer
-			const audioData = new Float32Array(bufferSize * 2);
+			// Render audio from synthesizer directly into output buffers
 			this._synthesizer.renderAudio(
-				[
-					audioData.subarray(0, bufferSize),
-					audioData.subarray(bufferSize),
-				],
+				[leftChannel, rightChannel],
 				[],
 				[[]],
 				0,
 				bufferSize
 			);
-
-			// Copy to output buffers
-			leftChannel.set(audioData.subarray(0, bufferSize));
-			rightChannel.set(audioData.subarray(bufferSize));
 
 			return true;
 		}
