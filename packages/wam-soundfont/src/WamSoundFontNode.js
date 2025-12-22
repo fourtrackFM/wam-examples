@@ -4,10 +4,9 @@
 /** @typedef {import('../../api').WamEventType} WamEventType */
 /** @typedef {import('./Gui/index').WamExampleTemplateHTMLElement} WamExampleTemplateHTMLElement */
 
-import addFunctionModule from '../../sdk/src/addFunctionModule.js';
 import WamNode from '../../sdk/src/WamNode.js';
-import getWamSoundFontProcessor from './WamSoundFontProcessor.js';
-import getWamSoundFontSynth from './WamSoundFontSynth.js';
+import addFunctionModule from '../../sdk/src/addFunctionModule.js';
+import getWamSoundFontProcessor from './WamSoundFontProcessor.worklet.js';
 
 /* eslint-disable no-empty-function */
 /* eslint-disable no-unused-vars */
@@ -44,48 +43,30 @@ export default class WamSoundFontNode extends WamNode {
 		}
 
 		try {
-			console.log('[WamSoundFontNode] Loading spessasynth_core.js...');
+			console.log('[WamSoundFontNode] Loading spessasynth processor...');
 			await audioContext.audioWorklet.addModule(
 				`${baseUrl}/spessasynth_core.js`
 			);
-			console.log('[WamSoundFontNode] spessasynth_core.js loaded');
+			console.log('[WamSoundFontNode] spessasynth processor loaded');
 		} catch (err) {
 			console.error(
-				'[WamSoundFontNode] Failed to load spessasynth_core.js:',
+				'[WamSoundFontNode] Failed to load spessasynth processor:',
 				err
 			);
 			throw err;
 		}
 
 		try {
-			console.log('[WamSoundFontNode] Adding getWamSoundFontSynth...');
+			console.log('[WamSoundFontNode] Loading WamSoundFontProcessor...');
 			await addFunctionModule(
-				audioWorklet,
-				getWamSoundFontSynth,
-				moduleId
-			);
-			console.log('[WamSoundFontNode] getWamSoundFontSynth added');
-		} catch (err) {
-			console.error(
-				'[WamSoundFontNode] Failed to add getWamSoundFontSynth:',
-				err
-			);
-			throw err;
-		}
-
-		try {
-			console.log(
-				'[WamSoundFontNode] Adding getWamSoundFontProcessor...'
-			);
-			await addFunctionModule(
-				audioWorklet,
+				audioContext.audioWorklet,
 				getWamSoundFontProcessor,
 				moduleId
 			);
-			console.log('[WamSoundFontNode] getWamSoundFontProcessor added');
+			console.log('[WamSoundFontNode] WamSoundFontProcessor loaded');
 		} catch (err) {
 			console.error(
-				'[WamSoundFontNode] Failed to add getWamSoundFontProcessor:',
+				'[WamSoundFontNode] Failed to load WamSoundFontProcessor:',
 				err
 			);
 			throw err;

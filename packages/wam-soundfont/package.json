@@ -1,21 +1,24 @@
 {
-	"name": "wam-soundfont",
-	"version": "1.0.0",
-	"description": "WAM SoundFont Player",
-	"type": "module",
-	"scripts": {
-		"clean": "if exist dist rmdir /s /q dist",
-		"prebuild": "npm run clean",
-		"build": "tsc --noEmit && node build.js",
-		"postbuild": "npm run copy-to-fourtrack",
-		"copy-to-fourtrack": "xcopy /E /I /Y dist\\* C:\\Users\\acous\\Documents\\GitHub\\fourtrack\\public\\wam\\wam-soundfont\\",
-		"test": "node test/sf2-parser.test.js && node test/sf2-debug.test.js"
-	},
-	"dependencies": {
-		"spessasynth_lib": "^4.0.19"
-	},
-	"devDependencies": {
-		"esbuild": "^0.24.2",
-		"typescript": "^5.0.0"
-	}
+  "name": "wam-soundfont",
+  "version": "1.0.0",
+  "description": "WAM SoundFont Player",
+  "type": "module",
+  "scripts": {
+    "clean": "if exist dist rmdir /s /q dist",
+    "prebuild": "npm run clean",
+    "build": "tsc --noEmit && rollup -c",
+    "postbuild": "npm run copy-to-fourtrack",
+    "copy-to-fourtrack": "xcopy /E /I /Y dist\\\\* C:\\\\Users\\\\acous\\\\Documents\\\\GitHub\\\\fourtrack\\\\public\\\\wam\\\\wam-soundfont\\\\",
+    "test": "node test/sf2-parser.test.js && node test/sf2-debug.test.js"
+  },
+  "dependencies": {
+    "spessasynth_lib": "^4.0.19"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.9",
+    "@rollup/plugin-node-resolve": "^15.3.1",
+    "rollup": "^4.54.0",
+    "rollup-plugin-copy": "^3.5.0",
+    "typescript": "^5.0.0"
+  }
 }

@@ -101,9 +101,9 @@ export default class WamExampleTemplatePlugin extends WebAudioModule {
 		}
 
 		// Set initial state if applicable
-		if (initialState) wamExampleTemplateNode.setState(initialState);
+		if (initialState) wamSoundFontNode.setState(initialState);
 
-		return wamExampleTemplateNode;
+		return wamSoundFontNode;
 	}
 
 	createGui() {
