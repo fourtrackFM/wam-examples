@@ -85,7 +85,10 @@ const getWamSoundFontProcessor = (moduleId) => {
 				);
 
 				const soundBank = SoundBankLoader.fromArrayBuffer(arrayBuffer);
-				this._synthesizer.soundBankManager.addSoundBank(soundBank, "main");
+				this._synthesizer.soundBankManager.addSoundBank(
+					soundBank,
+					'main'
+				);
 				this._soundFontLoaded = true;
 
 				console.log(
@@ -123,7 +126,10 @@ const getWamSoundFontProcessor = (moduleId) => {
 				arrayBuffer.byteLength
 			);
 
-			await this._synthesizer.soundBankManager.addSoundBank(arrayBuffer, "main");
+			await this._synthesizer.soundBankManager.addSoundBank(
+				arrayBuffer,
+				'main'
+			);
 			this._soundFontLoaded = true;
 
 			console.log(
@@ -182,35 +188,49 @@ const getWamSoundFontProcessor = (moduleId) => {
 		}
 
 		/**
-		 * Process audio
+		 * Process audio - called by WAM framework with sample-accurate slices
+		 * @param {number} startSample beginning of processing slice
+		 * @param {number} endSample end of processing slice
 		 * @param {Float32Array[][]} inputs
 		 * @param {Float32Array[][]} outputs
 		 * @param {Object} parameters
-		 * @returns {boolean}
 		 */
-		_process(inputs, outputs, parameters) {
+		_process(startSample, endSample, inputs, outputs, parameters) {
 			if (!this._synthesizer || !this._soundFontLoaded) {
-				return true;
+				return;
 			}
 
 			const output = outputs[0];
 			if (!output || output.length < 2) {
-				return true;
+				return;
 			}
 
 			const leftChannel = output[0];
 			const rightChannel = output[1];
+			const numSamples = endSample - startSample;
 
-			// Render audio from synthesizer directly into output buffers
+			// Create temporary buffers for this slice
+			const leftTemp = new Float32Array(numSamples);
+			const rightTemp = new Float32Array(numSamples);
+			
+			// Create empty reverb and chorus buffers (we're not using effects)
+			const reverbLeft = new Float32Array(numSamples);
+			const reverbRight = new Float32Array(numSamples);
+			const chorusLeft = new Float32Array(numSamples);
+			const chorusRight = new Float32Array(numSamples);
+
+			// Render audio from synthesizer into temporary buffers
 			this._synthesizer.renderAudio(
-				[leftChannel, rightChannel],
-				[],
-				[[]],
+				[leftTemp, rightTemp],
+				[reverbLeft, reverbRight],
+				[chorusLeft, chorusRight],
 				0,
-				128 // fixed for web audio	
+				numSamples
 			);
 
-			return true;
+			// Copy from temporary buffers to the correct position in output
+			leftChannel.set(leftTemp, startSample);
+			rightChannel.set(rightTemp, startSample);
 		}
 	}
 
