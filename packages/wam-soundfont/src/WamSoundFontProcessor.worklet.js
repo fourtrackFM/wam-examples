@@ -49,7 +49,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 				console.log(
 					'[WamSoundFontProcessor] Creating SpessaSynthProcessor...'
 				);
-				this._synthesizer = new SpessaSynthProcessor(44100); // this.sampleRate
+				this._synthesizer = new SpessaSynthProcessor(44100); // .sampleRate
 
 				// Load the soundfont if it was provided
 				if (this._sf2Buffer) {
@@ -85,7 +85,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 				);
 
 				const soundBank = SoundBankLoader.fromArrayBuffer(arrayBuffer);
-				this._synthesizer.soundBankManager.addSoundBank(soundBank);
+				this._synthesizer.soundBankManager.addSoundBank(soundBank, "main");
 				this._soundFontLoaded = true;
 
 				console.log(
@@ -123,8 +123,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 				arrayBuffer.byteLength
 			);
 
-			const soundBank = SoundBankLoader.fromArrayBuffer(arrayBuffer);
-			await this._synthesizer.soundBankManager.addSoundBank(soundBank);
+			await this._synthesizer.soundBankManager.addSoundBank(arrayBuffer, "main");
 			this._soundFontLoaded = true;
 
 			console.log(
@@ -201,7 +200,6 @@ const getWamSoundFontProcessor = (moduleId) => {
 
 			const leftChannel = output[0];
 			const rightChannel = output[1];
-			const bufferSize = leftChannel.length;
 
 			// Render audio from synthesizer directly into output buffers
 			this._synthesizer.renderAudio(
@@ -209,7 +207,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 				[],
 				[[]],
 				0,
-				bufferSize
+				128 // fixed for web audio	
 			);
 
 			return true;
