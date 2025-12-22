@@ -779,7 +779,8 @@ const getWamExampleTemplateSynth = (moduleId) => {
 				// Extract preset-level generators (before we break)
 				// Convert unsigned 16-bit to signed 16-bit for envelope timecents
 				for (const gen of gens) {
-					const signedAmount = gen.amount > 32767 ? gen.amount - 65536 : gen.amount;
+					const signedAmount =
+						gen.amount > 32767 ? gen.amount - 65536 : gen.amount;
 					switch (gen.oper) {
 						case 33:
 							generators.delayVolEnv = signedAmount;
@@ -1282,36 +1283,38 @@ const getWamExampleTemplateSynth = (moduleId) => {
 			};
 
 			// Convert timecent values to seconds: time = 2^(timecents/1200)
-			const timecentsToSeconds = (tc) => Math.pow(2, tc / 1200.0);
+			// Special handling: -32768 means "no time" (0 seconds) for delay, attack, hold
+			const timecentsToSeconds = (tc) => {
+				if (tc <= -32768) return 0; // Conventionally no delay/instantaneous
+				return Math.pow(2, tc / 1200.0);
+			};
+		
+		// Volume Envelope - always apply (use defaults if not specified)
+		// Ignore delay and attack per user request
+		this._delayTime = 0;
+		this._attackTime = 0.001;
+		this._holdTime = timecentsToSeconds(g.holdVolEnv);
+		this._decayTime = Math.max(
+			0.001,
+			timecentsToSeconds(g.decayVolEnv)
+		);
 
-			// Volume Envelope - always apply (use defaults if not specified)
-			this._delayTime = timecentsToSeconds(g.delayVolEnv);
-			this._attackTime = Math.max(
-				0.001,
-				timecentsToSeconds(g.attackVolEnv)
-			);
-			this._holdTime = timecentsToSeconds(g.holdVolEnv);
-			this._decayTime = Math.max(
-				0.001,
-				timecentsToSeconds(g.decayVolEnv)
-			);
+		// sustainVolEnv is in centibels of attenuation (0-1000+)
+		// Convert to linear gain: gain = 10^(-attenuation/200)
+		const attenuationCB = Math.max(0, Math.min(1440, g.sustainVolEnv));
+		this._sustainLevel = Math.pow(10, -attenuationCB / 200.0);
 
-			// sustainVolEnv is in centibels of attenuation (0-1000+)
-			// Convert to linear gain: gain = 10^(-attenuation/200)
-			const attenuationCB = Math.max(0, Math.min(1440, g.sustainVolEnv));
-			this._sustainLevel = Math.pow(10, -attenuationCB / 200.0);
+		this._releaseTime = Math.max(
+			0.001,
+			timecentsToSeconds(g.releaseVolEnv)
+		);
 
-			this._releaseTime = Math.max(
-				0.001,
-				timecentsToSeconds(g.releaseVolEnv)
-			);
+		// Initial Attenuation (in centibels)
+		this._initialAttenuation = g.initialAttenuation / 10.0; // Convert cB to dB
 
-			// Initial Attenuation (in centibels)
-			this._initialAttenuation = g.initialAttenuation / 10.0; // Convert cB to dB
-
-			// Tuning
-			this._coarseTune = g.coarseTune;
-			this._fineTune = g.fineTune;
+		// Tuning
+		this._coarseTune = g.coarseTune;
+		this._fineTune = g.fineTune;
 
 			console.log('[Part] Envelope configured:', {
 				delay: this._delayTime,
