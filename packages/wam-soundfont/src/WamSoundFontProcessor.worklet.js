@@ -9,7 +9,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 
 	const ModuleScope =
 		audioWorkletGlobalScope.webAudioModules.getModuleScope(moduleId);
-	const { WamProcessor } = ModuleScope;
+	const { WamProcessor, WamParameterInfo } = ModuleScope;
 
 	// Import SpessaSynthProcessor from the previously loaded module
 	// Since spessasynth_core.js is loaded via addModule, check for its exports in globalThis
@@ -28,6 +28,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 			console.log('[WamSoundFontProcessor] super() completed');
 			this._ready = false;
 			this._soundFontLoaded = false;
+			this._currentProgram = 0;
 
 			// Store the soundfont buffer from processorOptions
 			this._sf2Buffer = options.processorOptions?.sf2Buffer;
@@ -35,6 +36,22 @@ const getWamSoundFontProcessor = (moduleId) => {
 				'[WamSoundFontProcessor] sf2Buffer received:',
 				!!this._sf2Buffer
 			);
+		}
+
+		/**
+		 * Fetch plugin's params.
+		 * @returns {WamParameterInfoMap}
+		 */
+		_generateWamParameterInfo() {
+			return {
+				program: new WamParameterInfo('program', {
+					type: 'int',
+					label: 'Program',
+					defaultValue: 0,
+					minValue: 0,
+					maxValue: 127,
+				}),
+			};
 		}
 
 		_initialize() {
@@ -49,7 +66,7 @@ const getWamSoundFontProcessor = (moduleId) => {
 				console.log(
 					'[WamSoundFontProcessor] Creating SpessaSynthProcessor...'
 				);
-				this._synthesizer = new SpessaSynthProcessor(44100); // .sampleRate
+				this._synthesizer = new SpessaSynthProcessor(audioWorkletGlobalScope.sampleRate);
 
 				// Load the soundfont if it was provided
 				if (this._sf2Buffer) {
@@ -179,7 +196,12 @@ const getWamSoundFontProcessor = (moduleId) => {
 					this._synthesizer.controllerChange(channel, data1, data2);
 					break;
 				case 0xc0: // Program Change
+					this._currentProgram = data1;
 					this._synthesizer.programChange(channel, data1);
+					// Update the parameter value
+					if (this._parameterInterpolators.program) {
+						this._parameterInterpolators.program.values.fill(data1);
+					}
 					break;
 				case 0xe0: // Pitch Bend
 					this._synthesizer.pitchWheel(channel, (data2 << 7) | data1);
