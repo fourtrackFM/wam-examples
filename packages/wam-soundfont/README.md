@@ -431,11 +431,48 @@ The plugin exposes various parameters for controlling playback. Use `getParamete
 
 ## Development
 
+### Building
+
 To build the plugin:
 
 ```bash
 npm run build
 ```
+
+This will:
+
+1. Clean the dist directory
+2. Compile TypeScript and bundle with Rollup
+3. Copy built files to the configured destination (if set)
+
+### Copy Configuration
+
+The build process can automatically copy the built files to a destination directory. To configure this:
+
+1. Copy `.env.example` to `.env`:
+
+    ```bash
+    cp .env.example .env
+    ```
+
+2. Edit `.env` and set `COPY_DIST_DESTINATION` to your desired path:
+
+    ```bash
+    # Windows example
+    COPY_DIST_DESTINATION=C:\\path\\to\\your\\project\\public\\wam\\wam-soundfont\\
+
+    # Unix/Linux/macOS example
+    COPY_DIST_DESTINATION=/Users/username/projects/my-app/public/wam/wam-soundfont/
+
+    # Relative path example
+    COPY_DIST_DESTINATION=../../../my-app/public/wam/wam-soundfont/
+    ```
+
+3. Leave `COPY_DIST_DESTINATION` empty or comment it out to skip copying.
+
+The copy script is cross-platform and will create the destination directory if it doesn't exist.
+
+### Testing
 
 To test the plugin:
 
