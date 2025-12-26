@@ -1,0 +1,5 @@
+# never store anything that even resembles sensitive information
+.env
+.env.*
+.env*
+!.env.example
