@@ -208,7 +208,7 @@ Here's a complete working example that demonstrates both methods:
 					try {
 						await initializeAudio();
 						const soundfontUrl =
-							'https://static.fourtrack.fm/GeneralUser-GS-3.sf3';
+							'https://myurl.com/GeneralUser-GS-3.sf3';
 						const arrayBuffer = await loadSoundfontFromUrl(
 							soundfontUrl
 						);
@@ -251,7 +251,7 @@ Here's a complete working example that demonstrates both methods:
 
 2. **File Formats**: Supports both SoundFont 2 (.sf2) and SoundFont 3 (.sf3) files.
 
-3. **Default SoundFont**: The recommended default soundfont is available at: `https://static.fourtrack.fm/GeneralUser-GS-3.sf3`
+3. **Default SoundFont**: You can find soundfonts on Polyphone. the most generously licensed soundfont is available at https://www.schristiancollins.com/generaluser / https://drive.google.com/uc?export=download&id=1UJ1mrY2l_C_YbKeyywNUymBz7OTVzQLU
 
 4. **File Size**: SoundFont files can be quite large (several MB to hundreds of MB), so consider showing loading progress for better user experience.
 
