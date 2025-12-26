@@ -277,6 +277,154 @@ The plugin supports WAM-MIDI events for note triggering:
 -   Program Change (instrument switching)
 -   Up to 16 voices of polyphony
 
+#### scheduleEvents Examples
+
+Once your WAM instance is initialized, you can send MIDI events using the `scheduleEvents` method:
+
+##### Program Change (Instrument Selection)
+
+```javascript
+// Change to a different instrument (program)
+// Program numbers are 0-127 (corresponding to General MIDI instruments)
+const programChangeEvent = {
+	type: 'wam-midi',
+	data: {
+		bytes: [0xc0, 64], // Program Change on channel 0 to program 64 (Lead 1 - Square)
+	},
+};
+
+// Schedule the program change immediately
+wamInstance.audioNode.scheduleEvents(
+	audioContext.currentTime, // when to execute (now)
+	[programChangeEvent]
+);
+
+// Or schedule for a future time
+wamInstance.audioNode.scheduleEvents(
+	audioContext.currentTime + 1.0, // 1 second from now
+	[programChangeEvent]
+);
+```
+
+##### Note On/Off Events
+
+```javascript
+// Play a single note (Middle C)
+const noteOnEvent = {
+	type: 'wam-midi',
+	data: {
+		bytes: [0x90, 60, 100], // Note On: channel 0, note 60 (C4), velocity 100
+	},
+};
+
+const noteOffEvent = {
+	type: 'wam-midi',
+	data: {
+		bytes: [0x80, 60, 0], // Note Off: channel 0, note 60 (C4), velocity 0
+	},
+};
+
+// Play note immediately
+wamInstance.audioNode.scheduleEvents(audioContext.currentTime, [noteOnEvent]);
+
+// Stop note after 1 second
+wamInstance.audioNode.scheduleEvents(audioContext.currentTime + 1.0, [
+	noteOffEvent,
+]);
+```
+
+##### Playing Chords
+
+```javascript
+// Play a C major chord (C-E-G)
+const chordOn = [
+	{ type: 'wam-midi', data: { bytes: [0x90, 60, 80] } }, // C4
+	{ type: 'wam-midi', data: { bytes: [0x90, 64, 80] } }, // E4
+	{ type: 'wam-midi', data: { bytes: [0x90, 67, 80] } }, // G4
+];
+
+const chordOff = [
+	{ type: 'wam-midi', data: { bytes: [0x80, 60, 0] } }, // C4 off
+	{ type: 'wam-midi', data: { bytes: [0x80, 64, 0] } }, // E4 off
+	{ type: 'wam-midi', data: { bytes: [0x80, 67, 0] } }, // G4 off
+];
+
+// Play chord
+wamInstance.audioNode.scheduleEvents(audioContext.currentTime, chordOn);
+
+// Release chord after 2 seconds
+wamInstance.audioNode.scheduleEvents(audioContext.currentTime + 2.0, chordOff);
+```
+
+##### Interactive Piano Example
+
+```javascript
+// Example: Create interactive piano keys
+function createPianoKey(noteNumber, noteName) {
+	const button = document.createElement('button');
+	button.textContent = noteName;
+	button.style.margin = '2px';
+	button.style.padding = '10px';
+
+	// Note on when button is pressed
+	button.addEventListener('mousedown', () => {
+		const noteOn = {
+			type: 'wam-midi',
+			data: { bytes: [0x90, noteNumber, 100] },
+		};
+		wamInstance.audioNode.scheduleEvents(audioContext.currentTime, [
+			noteOn,
+		]);
+	});
+
+	// Note off when button is released
+	button.addEventListener('mouseup', () => {
+		const noteOff = {
+			type: 'wam-midi',
+			data: { bytes: [0x80, noteNumber, 0] },
+		};
+		wamInstance.audioNode.scheduleEvents(audioContext.currentTime, [
+			noteOff,
+		]);
+	});
+
+	document.body.appendChild(button);
+}
+
+// Create an octave of piano keys
+const notes = [
+	{ num: 60, name: 'C' },
+	{ num: 61, name: 'C#' },
+	{ num: 62, name: 'D' },
+	{ num: 63, name: 'D#' },
+	{ num: 64, name: 'E' },
+	{ num: 65, name: 'F' },
+	{ num: 66, name: 'F#' },
+	{ num: 67, name: 'G' },
+	{ num: 68, name: 'G#' },
+	{ num: 69, name: 'A' },
+	{ num: 70, name: 'A#' },
+	{ num: 71, name: 'B' },
+];
+
+notes.forEach((note) => createPianoKey(note.num, note.name));
+```
+
+#### MIDI Message Format
+
+WAM-MIDI events use standard MIDI message bytes:
+
+-   **Note On**: `[0x90 | channel, note, velocity]`
+-   **Note Off**: `[0x80 | channel, note, velocity]`
+-   **Program Change**: `[0xC0 | channel, program]`
+
+Where:
+
+-   `channel`: MIDI channel (0-15)
+-   `note`: MIDI note number (0-127, where 60 = Middle C)
+-   `velocity`: Note velocity (0-127, where 0 = off, 127 = maximum)
+-   `program`: Instrument program (0-127, General MIDI standard)
+
 ### Parameters
 
 The plugin exposes various parameters for controlling playback. Use `getParameterInfo()` to discover available parameters.
