@@ -251,7 +251,7 @@ Here's a complete working example that demonstrates both methods:
 
 2. **File Formats**: Supports both SoundFont 2 (.sf2) and SoundFont 3 (.sf3) files.
 
-3. **Default SoundFont**: You can find soundfonts on Polyphone. the most generously licensed soundfont is available at https://www.schristiancollins.com/generaluser / https://drive.google.com/uc?export=download&id=1UJ1mrY2l_C_YbKeyywNUymBz7OTVzQLU
+3. **Default SoundFont**: You can find soundfonts anywhere. The [Polyphone editor](https://www.polyphone.io/) site has a lot of info and an excellent editor and viewer for soundfonts. The most generously licensed soundfont I could find, through spessasynth, is available at https://www.schristiancollins.com/generaluser, license available here: https://github.com/mrbumpy409/GeneralUser-GS/blob/main/documentation/LICENSE.txt.
 
 4. **File Size**: SoundFont files can be quite large (several MB to hundreds of MB), so consider showing loading progress for better user experience.
 
