@@ -27,10 +27,22 @@ export default class WamExampleTemplatePlugin extends WebAudioModule {
 
 	_descriptorUrl = `${this._baseUrl}/descriptor.json`;
 
+	_soundfontArrayBuffer = null;
+
 	async initialize(state) {
 		console.log('[Plugin] initialize() called with state:', state);
 		console.log('[Plugin] baseUrl:', this._baseUrl);
 		console.log('[Plugin] moduleId:', this.moduleId);
+
+		// Store the soundfont arrayBuffer for later use
+		if (state && state.arrayBuffer) {
+			this._soundfontArrayBuffer = state.arrayBuffer;
+			console.log(
+				'[Plugin] Stored soundfont arrayBuffer, size:',
+				state.arrayBuffer.byteLength
+			);
+		}
+
 		try {
 			await this._loadDescriptor();
 			console.log('[Plugin] descriptor loaded');
@@ -56,16 +68,24 @@ export default class WamExampleTemplatePlugin extends WebAudioModule {
 
 		// Load SoundFont file first
 		console.log('[Plugin] Loading SoundFont...');
-		const soundfontUrl = 'https://static.fourtrack.fm/GeneralUser-GS.sf2';
 
-		try {
-			const response = await fetch(soundfontUrl);
-			const arrayBuffer = await response.arrayBuffer();
+		// Use the arrayBuffer stored during initialization
+		const arrayBuffer =
+			this._soundfontArrayBuffer ||
+			(initialState && initialState.arrayBuffer);
+		if (arrayBuffer) {
 			console.log(
-				'[Plugin] SoundFont loaded, size:',
+				'[Plugin] Using SoundFont from stored buffer, size:',
 				arrayBuffer.byteLength
 			);
+		} else {
+			console.error(
+				'[Plugin] No SoundFont arrayBuffer found, we will not be able to create the audio node.'
+			);
+			throw new Error('SoundFont arrayBuffer is required but not found');
+		}
 
+		try {
 			// Load bundled synth and processor
 			console.log('[Plugin] Calling WamSoundFontNode.addModules()...');
 			await WamSoundFontNode.addModules(

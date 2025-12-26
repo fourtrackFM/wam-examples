@@ -29,25 +29,18 @@ export default class WamSoundFontNode extends WamNode {
 	 * @param {string} baseUrl
 	 */
 	static async addModules(audioContext, moduleId, baseUrl) {
-		console.log('[WamSoundFontNode] addModules() called');
-		console.log('[WamSoundFontNode] baseUrl:', baseUrl);
-		console.log('[WamSoundFontNode] moduleId:', moduleId);
 		const { audioWorklet } = audioContext;
 		try {
-			console.log('[WamSoundFontNode] Calling super.addModules()...');
 			await super.addModules(audioContext, moduleId);
-			console.log('[WamSoundFontNode] super.addModules() completed');
 		} catch (err) {
 			console.error('[WamSoundFontNode] super.addModules() failed:', err);
 			throw err;
 		}
 
 		try {
-			console.log('[WamSoundFontNode] Loading spessasynth processor...');
 			await audioContext.audioWorklet.addModule(
 				`${baseUrl}/spessasynth_core.js`
 			);
-			console.log('[WamSoundFontNode] spessasynth processor loaded');
 		} catch (err) {
 			console.error(
 				'[WamSoundFontNode] Failed to load spessasynth processor:',
